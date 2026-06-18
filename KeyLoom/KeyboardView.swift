@@ -3,15 +3,149 @@ import AppKit
 import Carbon.HIToolbox
 import ServiceManagement
 
+// MARK: - Sound Manager
+class SoundManager {
+    static let shared = SoundManager()
+
+    private var cache: [String: NSSound] = [:]
+
+    enum SoundStyle: String, CaseIterable {
+        case keyClick = "keyClick"
+        case soft = "soft"
+        case mechanical = "mechanical"
+        case glass = "glass"
+        case minimal = "minimal"
+        case bottle = "bottle"
+
+        var displayName: String {
+            switch self {
+            case .keyClick: return "Key Click"
+            case .soft: return "Soft"
+            case .mechanical: return "Mechanical"
+            case .glass: return "Glass"
+            case .minimal: return "Minimal"
+            case .bottle: return "Bottle"
+            }
+        }
+
+        var spec: (frequencies: [Double], duration: Double, volume: Double) {
+            switch self {
+            case .keyClick: return ([1200, 1800], 0.03, 0.35)
+            case .soft: return ([800], 0.02, 0.30)
+            case .mechanical: return ([2000, 2500], 0.025, 0.35)
+            case .glass: return ([3000, 4200], 0.03, 0.30)
+            case .minimal: return ([1400], 0.015, 0.25)
+            case .bottle: return ([600, 900], 0.04, 0.35)
+            }
+        }
+    }
+
+    private init() {
+        for style in SoundStyle.allCases {
+            if let s = generateSound(frequencies: style.spec.frequencies, duration: style.spec.duration, volume: style.spec.volume, name: "keyloom_\(style.rawValue)") {
+                cache[style.rawValue] = s
+            }
+        }
+        if let paste = generateSound(frequencies: [800, 1200], duration: 0.08, volume: 0.25, name: "keyloom_clipboard_paste") {
+            cache["clipboard_paste"] = paste
+        }
+        if let pin = generateSound(frequencies: [1200, 1600], duration: 0.06, volume: 0.25, name: "keyloom_clipboard_pin") {
+            cache["clipboard_pin"] = pin
+        }
+        if let del = generateSound(frequencies: [400, 200], duration: 0.08, volume: 0.25, name: "keyloom_clipboard_delete") {
+            cache["clipboard_delete"] = del
+        }
+    }
+
+    private func generateSound(frequencies: [Double], duration: Double, volume: Double, name: String) -> NSSound? {
+        let sampleRate: Double = 44100
+        let numSamples = Int(sampleRate * duration)
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(name).wav")
+        if FileManager.default.fileExists(atPath: tempURL.path) { return NSSound(contentsOf: tempURL, byReference: false) }
+
+        var samples = [Int16](repeating: 0, count: numSamples)
+        for i in 0..<numSamples {
+            let t = Double(i) / sampleRate
+            let envelope = exp(-t * (4.0 / duration))
+            var sample: Double = 0
+            for f in frequencies {
+                sample += sin(2.0 * .pi * f * t)
+            }
+            sample /= Double(frequencies.count)
+            samples[i] = Int16(clamping: Int(sample * envelope * volume * Double(Int16.max)))
+        }
+
+        var header = Data()
+        let bytesPerSample = 2
+        let numChannels: UInt16 = 1
+        let bitsPerSample: UInt16 = 16
+        let sampleRateU32 = UInt32(sampleRate)
+        let byteRate = UInt32(sampleRate * Double(bytesPerSample))
+        let blockAlign = UInt16(bytesPerSample)
+        let dataSize = Int32(numSamples * bytesPerSample)
+
+        header.append(contentsOf: "RIFF".utf8)
+        var riffSize = UInt32(36 + dataSize).littleEndian
+        header.append(Data(bytes: &riffSize, count: 4))
+        header.append(contentsOf: "WAVE".utf8)
+        header.append(contentsOf: "fmt ".utf8)
+        var fmtSize = UInt32(16).littleEndian
+        header.append(Data(bytes: &fmtSize, count: 4))
+        var audioFormat = UInt16(1).littleEndian
+        header.append(Data(bytes: &audioFormat, count: 2))
+        var channels = numChannels.littleEndian
+        header.append(Data(bytes: &channels, count: 2))
+        var srate = sampleRateU32.littleEndian
+        header.append(Data(bytes: &srate, count: 4))
+        var bRate = byteRate.littleEndian
+        header.append(Data(bytes: &bRate, count: 4))
+        var bAlign = blockAlign.littleEndian
+        header.append(Data(bytes: &bAlign, count: 2))
+        var bps = UInt16(bitsPerSample).littleEndian
+        header.append(Data(bytes: &bps, count: 2))
+        header.append(contentsOf: "data".utf8)
+        var dSize = dataSize.littleEndian
+        header.append(Data(bytes: &dSize, count: 4))
+
+        let wavData = header + Data(bytes: &samples, count: Int(dataSize))
+        try? wavData.write(to: tempURL)
+        return NSSound(contentsOf: tempURL, byReference: false)
+    }
+
+    func playKeyPress() {
+        guard KeyboardSettings.shared.soundEnabled else { return }
+        play(KeyboardSettings.shared.soundStyle)
+    }
+
+    func playClipboard() { playIfEnabled("clipboard_paste") }
+    func playClipboardPin() { playIfEnabled("clipboard_pin") }
+    func playClipboardDelete() { playIfEnabled("clipboard_delete") }
+
+    func previewStyle(_ style: SoundStyle) {
+        play(style.rawValue)
+    }
+
+    private func playIfEnabled(_ name: String) {
+        guard KeyboardSettings.shared.soundEnabled else { return }
+        play(name)
+    }
+
+    private func play(_ name: String) {
+        guard let sound = cache[name] else { return }
+        sound.volume = KeyboardSettings.shared.soundVolume
+        sound.currentTime = 0
+        sound.play()
+    }
+}
+
 // MARK: - Keystroke Sender
 struct KeystrokeSender {
     static let shared = KeystrokeSender()
 
     func paste(_ text: String) {
-        FocusManager.shared.restore()
-
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
+        ClipboardManager.shared.addItem(ClipboardItem(text: text))
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             let src = CGEventSource(stateID: .combinedSessionState)
@@ -35,6 +169,437 @@ struct KeystrokeSender {
 
     func sendTab() { paste("\t") }
     func sendReturn() { paste("\n") }
+}
+
+// MARK: - Clipboard Manager
+struct ClipboardItem: Identifiable, Codable {
+    let id: UUID
+    let text: String
+    let timestamp: Date
+    var isPinned: Bool
+    var pinnedAt: Date?
+
+    init(id: UUID = UUID(), text: String, timestamp: Date = Date(), isPinned: Bool = false, pinnedAt: Date? = nil) {
+        self.id = id
+        self.text = text
+        self.timestamp = timestamp
+        self.isPinned = isPinned
+        self.pinnedAt = pinnedAt
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, text, timestamp, isPinned, pinnedAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        text = try container.decode(String.self, forKey: .text)
+        timestamp = try container.decode(Date.self, forKey: .timestamp)
+        isPinned = try container.decodeIfPresent(Bool.self, forKey: .isPinned) ?? false
+        pinnedAt = try container.decodeIfPresent(Date.self, forKey: .pinnedAt)
+    }
+}
+
+class ClipboardManager: ObservableObject {
+    static let shared = ClipboardManager()
+
+    @Published var items: [ClipboardItem] = []
+    private var maxItems: Int { KeyboardSettings.shared.clipboardMaxItems }
+    private var timer: Timer?
+    private var lastChangeCount: Int
+    private var storageURL: URL
+
+    var sortedItems: [ClipboardItem] {
+        items.sorted {
+            if $0.isPinned && $1.isPinned {
+                return ($0.pinnedAt ?? $0.timestamp) > ($1.pinnedAt ?? $1.timestamp)
+            }
+            return $0.isPinned && !$1.isPinned
+        }
+    }
+
+    var pinnedItems: [ClipboardItem] { sortedItems.filter(\.isPinned) }
+    var unpinnedItems: [ClipboardItem] { sortedItems.filter { !$0.isPinned } }
+
+    private init() {
+        let paths = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+        let appDir = paths[0].appendingPathComponent("com.fabiconcept.keyloom", isDirectory: true)
+        try? FileManager.default.createDirectory(at: appDir, withIntermediateDirectories: true)
+        storageURL = appDir.appendingPathComponent("clipboard.json")
+        lastChangeCount = NSPasteboard.general.changeCount
+        load()
+        if KeyboardSettings.shared.clipboardMonitorEnabled {
+            startMonitoring()
+        }
+    }
+
+    func updateMonitoring() {
+        if KeyboardSettings.shared.clipboardMonitorEnabled {
+            startMonitoring()
+        } else {
+            stopMonitoring()
+        }
+    }
+
+    func startMonitoring() {
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { [weak self] _ in
+            self?.checkClipboard()
+        }
+    }
+
+    func stopMonitoring() {
+        timer?.invalidate()
+        timer = nil
+    }
+
+    private func checkClipboard() {
+        let pb = NSPasteboard.general
+        guard pb.changeCount != lastChangeCount else { return }
+        lastChangeCount = pb.changeCount
+        guard let text = pb.string(forType: .string), !text.isEmpty else { return }
+        if items.first?.text == text { return }
+        let item = ClipboardItem(text: text)
+        DispatchQueue.main.async { self.addItem(item) }
+    }
+
+    func addItem(_ item: ClipboardItem) {
+        items.insert(item, at: 0)
+        if items.count > maxItems { items = Array(items.prefix(maxItems)) }
+        save()
+    }
+
+    func pasteItem(_ item: ClipboardItem) {
+        closeClipboard()
+        SoundManager.shared.playClipboard()
+        KeystrokeSender.shared.paste(item.text)
+    }
+
+    func togglePin(_ item: ClipboardItem) {
+        guard let i = items.firstIndex(where: { $0.id == item.id }) else { return }
+        items[i].isPinned.toggle()
+        items[i].pinnedAt = items[i].isPinned ? Date() : nil
+        SoundManager.shared.playClipboardPin()
+        save()
+    }
+
+    func deleteItem(_ item: ClipboardItem) {
+        items.removeAll { $0.id == item.id }
+        SoundManager.shared.playClipboardDelete()
+        save()
+    }
+
+    func clear() {
+        items.removeAll()
+        save()
+    }
+
+    func saveToFile() {
+        let panel = NSSavePanel()
+        panel.title = "Save Clipboard History"
+        panel.nameFieldStringValue = "clipboard.txt"
+        panel.allowedContentTypes = [.plainText]
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        var text = ""
+        for item in sortedItems {
+            let date = DateFormatter.localizedString(from: item.timestamp, dateStyle: .medium, timeStyle: .short)
+            text += "[\(date)]\(item.isPinned ? " ★" : "")\n\(item.text)\n\n"
+        }
+        try? text.write(to: url, atomically: true, encoding: .utf8)
+    }
+
+    private func save() {
+        guard let data = try? JSONEncoder().encode(items) else { return }
+        try? data.write(to: storageURL, options: .atomic)
+    }
+
+    private func load() {
+        guard let data = try? Data(contentsOf: storageURL),
+              let decoded = try? JSONDecoder().decode([ClipboardItem].self, from: data) else { return }
+        items = decoded
+    }
+}
+
+var clipboardWindow: NSWindow?
+
+extension NSPasteboard.PasteboardType {
+    static let keyloomSearchPasteboard: NSPasteboard.PasteboardType = .init("com.fabiconcept.keyloom.searchPasteboard")
+}
+
+struct ClipboardHistoryView: View {
+    @ObservedObject private var clipboard = ClipboardManager.shared
+    @State private var searchText = ""
+    @State private var hoveredItem: UUID?
+    @FocusState private var searchFocused: Bool
+
+    var filteredItems: [ClipboardItem] {
+        let source = clipboard.sortedItems
+        if searchText.isEmpty { return source }
+        return source.filter { $0.text.localizedCaseInsensitiveContains(searchText) }
+    }
+
+    var pinnedItems: [ClipboardItem] { clipboard.pinnedItems.filter { searchText.isEmpty || $0.text.localizedCaseInsensitiveContains(searchText) } }
+    var unpinnedItems: [ClipboardItem] { clipboard.unpinnedItems.filter { searchText.isEmpty || $0.text.localizedCaseInsensitiveContains(searchText) } }
+    var hasPinned: Bool { !pinnedItems.isEmpty }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 8) {
+                Image(systemName: "clipboard")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary)
+                Text("Clipboard")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.secondary)
+                Spacer()
+                if !clipboard.items.isEmpty {
+                    Button(action: { clipboard.saveToFile() }) {
+                        Image(systemName: "square.and.arrow.down")
+                            .font(.system(size: 10, weight: .medium))
+                    }
+                    .buttonStyle(.plain)
+                    .help("Save clipboard to file")
+                    Button(role: .destructive, action: { clipboard.clear() }) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 10, weight: .medium))
+                    }
+                    .buttonStyle(.plain)
+                    .help("Clear clipboard history")
+                }
+                Button(action: { closeClipboard() }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 9, weight: .medium))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+
+            SearchField(text: $searchText, isFocused: $searchFocused)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 6)
+
+            if filteredItems.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "rectangle.and.pencil.and.ellipsis")
+                        .font(.system(size: 20))
+                        .foregroundColor(.secondary.opacity(0.3))
+                    Text(searchText.isEmpty ? "Empty" : "No matches")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary.opacity(0.5))
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.bottom, 20)
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 1) {
+                        if hasPinned {
+                            Section {
+                                ForEach(pinnedItems) { item in
+                                    ClipboardRow(item: item, hoveredItem: $hoveredItem)
+                                }
+                            } header: {
+                                ClipboardSectionHeader(title: "PINNED", count: pinnedItems.count)
+                            }
+                            Divider().padding(.vertical, 2)
+                        }
+                        Section {
+                            ForEach(unpinnedItems) { item in
+                                ClipboardRow(item: item, hoveredItem: $hoveredItem)
+                            }
+                        } header: {
+                            if hasPinned {
+                                ClipboardSectionHeader(title: "RECENT", count: unpinnedItems.count)
+                            }
+                        }
+                    }
+                    .padding(.bottom, 4)
+                }
+                .scrollIndicators(.hidden)
+            }
+        }
+        .frame(width: 300, height: 380)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .shadow(color: .black.opacity(0.25), radius: 16, x: 0, y: 5)
+        .onAppear { searchFocused = true }
+    }
+}
+
+struct ClipboardSectionHeader: View {
+    let title: String
+    let count: Int
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Text(title)
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundColor(.secondary.opacity(0.5))
+                .kerning(1)
+            Text("\(count)")
+                .font(.system(size: 8, weight: .medium))
+                .foregroundColor(.secondary.opacity(0.35))
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+    }
+}
+
+struct SearchField: View {
+    @Binding var text: String
+    var isFocused: FocusState<Bool>.Binding
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(.secondary.opacity(0.5))
+            TextField("", text: $text, prompt: Text("Search").font(.system(size: 11)).foregroundColor(.secondary.opacity(0.4)))
+                .textFieldStyle(.plain)
+                .font(.system(size: 11))
+                .focused(isFocused)
+            if !text.isEmpty {
+                Button(action: { text = ""; isFocused.wrappedValue = true }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary.opacity(0.4))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .background(
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(Color.secondary.opacity(0.1))
+        )
+    }
+}
+
+struct ClipboardRow: View {
+    let item: ClipboardItem
+    @Binding var hoveredItem: UUID?
+    @ObservedObject private var clipboard = ClipboardManager.shared
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Button(action: { clipboard.pasteItem(item) }) {
+                HStack(spacing: 8) {
+                    RoundedRectangle(cornerRadius: 3, style: .continuous)
+                        .fill(item.isPinned ? Color.accentColor.opacity(0.15) : Color.secondary.opacity(0.08))
+                        .frame(width: 3)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(item.text)
+                            .font(.system(size: 11))
+                            .lineLimit(2)
+                            .truncationMode(.tail)
+                            .foregroundColor(.primary)
+                        Text(item.timestamp, style: .relative)
+                            .font(.system(size: 9))
+                            .foregroundColor(.secondary.opacity(0.6))
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity)
+
+            HStack(spacing: 0) {
+                Button(action: { clipboard.togglePin(item) }) {
+                    Image(systemName: item.isPinned ? "pin.slash.fill" : "pin.fill")
+                        .font(.system(size: 9))
+                        .foregroundColor(item.isPinned ? .accentColor : .secondary.opacity(0.4))
+                        .frame(width: 22, height: 22)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help(item.isPinned ? "Unpin" : "Pin")
+
+                Button(action: { clipboard.deleteItem(item) }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 8, weight: .medium))
+                        .foregroundColor(.secondary.opacity(0.4))
+                        .frame(width: 22, height: 22)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help("Delete")
+            }
+            .padding(.trailing, 6)
+            .opacity(hoveredItem == item.id ? 1 : 0)
+            .animation(.easeInOut(duration: 0.1), value: hoveredItem)
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(hoveredItem == item.id ? Color.primary.opacity(0.06) : .clear)
+                .padding(.horizontal, 6)
+        )
+        .onHover { hovering in
+            hoveredItem = hovering ? item.id : nil
+        }
+    }
+}
+
+class ClipboardFocusPanel: NSPanel {
+    override var canBecomeKey: Bool { true }
+}
+
+func openClipboard() {
+    if let existing = clipboardWindow {
+        existing.orderFrontRegardless()
+        return
+    }
+
+    let panel = ClipboardFocusPanel(
+        contentRect: NSRect(x: 0, y: 0, width: 300, height: 380),
+        styleMask: [.borderless, .nonactivatingPanel, .fullSizeContentView],
+        backing: .buffered,
+        defer: false
+    )
+    panel.isFloatingPanel = true
+    panel.level = .floating
+    panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+    panel.isMovableByWindowBackground = true
+    panel.backgroundColor = .clear
+    panel.isOpaque = false
+    panel.hasShadow = true
+    panel.titleVisibility = .hidden
+    panel.titlebarAppearsTransparent = true
+    panel.worksWhenModal = true
+    panel.hidesOnDeactivate = false
+    panel.isReleasedWhenClosed = false
+
+    let hostingView = NSHostingView(rootView: ClipboardHistoryView())
+    panel.contentView = hostingView
+
+    if let screen = NSScreen.main {
+        let screenFrame = screen.visibleFrame
+        let x = screenFrame.maxX - 320
+        let y = screenFrame.midY - 190
+        panel.setFrameOrigin(NSPoint(x: x, y: y))
+    }
+
+    NotificationCenter.default.addObserver(
+        forName: NSWindow.didMoveNotification,
+        object: panel,
+        queue: .main
+    ) { _ in
+        let origin = panel.frame.origin
+        UserDefaults.standard.set(["x": origin.x, "y": origin.y], forKey: "clipboardPanelFrame")
+    }
+
+    panel.orderFrontRegardless()
+    clipboardWindow = panel
+}
+
+func closeClipboard() {
+    clipboardWindow?.orderOut(nil)
+    clipboardWindow = nil
 }
 
 // MARK: - Physical Keyboard Shift Monitor
@@ -186,6 +751,21 @@ class KeyboardSettings: ObservableObject {
     @Published var hasSeenWelcome: Bool = false {
         didSet { UserDefaults.standard.set(hasSeenWelcome, forKey: "hasSeenWelcome") }
     }
+    @Published var clipboardMaxItems: Int = 500 {
+        didSet { UserDefaults.standard.set(clipboardMaxItems, forKey: "clipboardMaxItems") }
+    }
+    @Published var clipboardMonitorEnabled: Bool = true {
+        didSet { UserDefaults.standard.set(clipboardMonitorEnabled, forKey: "clipboardMonitorEnabled") }
+    }
+    @Published var soundEnabled: Bool = true {
+        didSet { UserDefaults.standard.set(soundEnabled, forKey: "soundEnabled") }
+    }
+    @Published var soundStyle: String = SoundManager.SoundStyle.keyClick.rawValue {
+        didSet { UserDefaults.standard.set(soundStyle, forKey: "soundStyle") }
+    }
+    @Published var soundVolume: Float = 0.5 {
+        didSet { UserDefaults.standard.set(soundVolume, forKey: "soundVolume") }
+    }
 
     static let defaults: [String: Any] = [
         "keySize": 30,
@@ -233,6 +813,16 @@ class KeyboardSettings: ObservableObject {
         self.startMode = d.string(forKey: "startMode") ?? "expanded"
         self.launchAtLogin = d.object(forKey: "launchAtLogin") as? Bool ?? false
         self.hasSeenWelcome = d.object(forKey: "hasSeenWelcome") as? Bool ?? false
+        self.clipboardMaxItems = d.object(forKey: "clipboardMaxItems") as? Int ?? 500
+        self.clipboardMonitorEnabled = d.object(forKey: "clipboardMonitorEnabled") as? Bool ?? true
+        self.soundVolume = d.object(forKey: "soundVolume") as? Float ?? 0.5
+        let savedStyle = d.string(forKey: "soundStyle") ?? SoundManager.SoundStyle.keyClick.rawValue
+        if SoundManager.SoundStyle(rawValue: savedStyle) != nil {
+            self.soundStyle = savedStyle
+        } else {
+            self.soundStyle = SoundManager.SoundStyle.keyClick.rawValue
+            d.set(self.soundStyle, forKey: "soundStyle")
+        }
     }
 
     func effectiveCollapsedKeys() -> [String] {
@@ -266,6 +856,11 @@ class KeyboardSettings: ObservableObject {
         fontSize = 13
         startMode = "expanded"
         launchAtLogin = false
+        clipboardMaxItems = 500
+        clipboardMonitorEnabled = true
+        soundEnabled = true
+        soundStyle = SoundManager.SoundStyle.keyClick.rawValue
+        soundVolume = 0.5
     }
 
     private func updateLoginItem() {
@@ -303,6 +898,12 @@ struct SettingsView: View {
                 behaviorTab.tag("behavior")
                     .tabItem { Label("Behavior", systemImage: "hand.tap") }
                     .help("Key visibility, quick keys, and broken keys")
+                clipboardTab.tag("clipboard")
+                    .tabItem { Label("Clipboard", systemImage: "clipboard") }
+                    .help("Clipboard history settings")
+                soundsTab.tag("sounds")
+                    .tabItem { Label("Sounds", systemImage: "speaker.wave.2") }
+                    .help("UI sounds and audio feedback")
             }
             .tabViewStyle(.automatic)
 
@@ -323,7 +924,7 @@ struct SettingsView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
         }
-        .frame(width: 460, height: 420)
+        .frame(width: 560, height: 480)
     }
 
     var layoutTab: some View {
@@ -517,6 +1118,99 @@ struct SettingsView: View {
         }
     }
 
+    var clipboardTab: some View {
+        Form {
+            Section(header: Text("Monitoring"), footer: Text("When disabled, new clipboard items won't be captured automatically.")) {
+                Toggle(isOn: Binding(
+                    get: { settings.clipboardMonitorEnabled },
+                    set: {
+                        settings.clipboardMonitorEnabled = $0
+                        if $0 {
+                            ClipboardManager.shared.updateMonitoring()
+                        } else {
+                            ClipboardManager.shared.updateMonitoring()
+                        }
+                    }
+                )) {
+                    Label("Auto-Monitor Clipboard", systemImage: "eye")
+                }
+                .help("Automatically watch for new clipboard items")
+            }
+            Section(header: Text("Storage"), footer: Text("Oldest items are evicted first when limit is reached.")) {
+                HStack {
+                    Label("Max History", systemImage: "number")
+                    Spacer()
+                    Picker("", selection: $settings.clipboardMaxItems) {
+                        Text("100").tag(100)
+                        Text("200").tag(200)
+                        Text("500").tag(500)
+                        Text("1000").tag(1000)
+                    }
+                    .frame(width: 100)
+                }
+                .help("Maximum number of clipboard items to store")
+                HStack {
+                    Label("Current Items", systemImage: "tray.full")
+                    Spacer()
+                    Text("\(ClipboardManager.shared.items.count) / \(settings.clipboardMaxItems)")
+                        .font(.system(.body, design: .monospaced))
+                        .foregroundColor(.secondary)
+                }
+                Button(action: { ClipboardManager.shared.clear() }) {
+                    Label("Clear History", systemImage: "trash")
+                }
+                .help("Delete all clipboard history")
+            }
+        }
+        .formStyle(.grouped)
+        .padding(.horizontal, 4)
+    }
+
+    var soundsTab: some View {
+        Form {
+            Section(header: Text("Audio"), footer: Text("Sounds play during keyboard and clipboard actions.")) {
+                Toggle(isOn: $settings.soundEnabled) {
+                    Label("Enable Sounds", systemImage: "speaker.wave.2.fill")
+                }
+                .help("Toggle all UI sounds on or off")
+                if settings.soundEnabled {
+                    HStack {
+                        Label("Volume", systemImage: "speaker.wave.3")
+                        Spacer()
+                        Slider(value: $settings.soundVolume, in: 0...1, step: 0.05)
+                            .frame(width: 150)
+                        Text("\(Int(settings.soundVolume * 100))%")
+                            .monospacedDigit()
+                            .frame(width: 40)
+                    }
+                    .help("Sound playback volume")
+                    HStack {
+                        Label("Key Sound", systemImage: "keyboard")
+                        Spacer()
+                        Picker("", selection: $settings.soundStyle) {
+                            ForEach(SoundManager.SoundStyle.allCases, id: \.rawValue) { style in
+                                Text(style.displayName).tag(style.rawValue)
+                            }
+                        }
+                        .frame(width: 100)
+                        Button(action: {
+                            if let style = SoundManager.SoundStyle(rawValue: settings.soundStyle) {
+                                SoundManager.shared.previewStyle(style)
+                            }
+                        }) {
+                            Image(systemName: "play.circle")
+                        }
+                        .buttonStyle(.plain)
+                        .help("Preview selected sound")
+                    }
+                    .help("Choose the sound played when tapping a key")
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .padding(.horizontal, 4)
+    }
+
     var selectedKeysFooter: some View {
         Group {
             if settings.collapsedKeys.count < 2 {
@@ -639,7 +1333,7 @@ func openSettings() {
     let hostingView = NSHostingView(rootView: settingsView)
 
     let window = NSPanel(
-        contentRect: NSRect(x: 0, y: 0, width: 460, height: 420),
+        contentRect: NSRect(x: 0, y: 0, width: 560, height: 480),
         styleMask: [.titled, .closable, .nonactivatingPanel],
         backing: .buffered,
         defer: false
@@ -768,6 +1462,15 @@ struct KeyboardView: View {
             .buttonStyle(.plain)
             .focusable(false)
             .help("Open quick keys panel")
+            Button(action: { openClipboard() }) {
+                Image(systemName: "clipboard")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .focusable(false)
+            .help("Open clipboard history (\(ClipboardManager.shared.items.count))")
             Button(action: { openSettings() }) {
                 Image(systemName: "gearshape")
                     .font(.system(size: 12, weight: .medium))
@@ -843,6 +1546,7 @@ struct KeyboardView: View {
 
     func handleKey(_ key: Key) {
         usageTracker.recordUse(key.label)
+        SoundManager.shared.playKeyPress()
         switch key.type {
         case .character:
             let useShift = keyboardState.isShifted || (keyboardState.isCaps && key.label.count == 1 && key.label.first?.isLetter == true)
@@ -951,7 +1655,7 @@ struct CollapsedKeyboardView: View {
                     )
                 }
             }
-            .padding(.horizontal, 8)
+            .padding(.horizontal, isHovering ? 0 : 8)
             .padding(.bottom, 8)
             .padding(.top, isHovering ? 0 : 8)
         }
@@ -1012,6 +1716,15 @@ struct CollapsedKeyboardView: View {
             .buttonStyle(.plain)
             .focusable(false)
             .help("Expand to full keyboard")
+            Button(action: { openClipboard() }) {
+                Image(systemName: "clipboard")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.secondary)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .focusable(false)
+            .help("Open clipboard history")
             Button(action: { closeCollapsedPanel() }) {
                 Image(systemName: "xmark.circle")
                     .font(.system(size: 11, weight: .medium))
@@ -1037,7 +1750,13 @@ struct CollapsedKeyboardView: View {
     }
 
     func handleKey(_ key: Key) {
+        hoverWorkItem?.cancel()
+        hoverWorkItem = nil
+        withAnimation(.easeInOut(duration: 0.15)) {
+            isHovering = false
+        }
         usageTracker.recordUse(key.label)
+        SoundManager.shared.playKeyPress()
         switch key.type {
         case .character:
             let useShift = keyboardState.isShifted || (keyboardState.isCaps && key.label.count == 1 && key.label.first?.isLetter == true)

@@ -1,0 +1,10 @@
+# Appfile for KeyLoom
+app_identifier "com.fabiconcept.keyloom"
+
+# Apple ID for notarization
+# Set via environment variable: APPLE_ID
+# apple_id "your@email.com"
+
+# Team ID (found in App Store Connect > Membership)
+# Set via environment variable: APPLE_TEAM_ID
+# team_id "YOUR_TEAM_ID"

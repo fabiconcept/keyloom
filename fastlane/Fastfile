@@ -1,0 +1,97 @@
+# Fastlane for KeyLoom
+#
+# Setup:
+#   Install: brew install fastlane
+#   Run:     fastlane <lane>
+#
+# Environment:
+#   APPLE_ID        – Your Apple ID
+#   APPLE_TEAM_ID   – Your Team ID
+#   MATCH_PASSWORD  – Password for match encryption (if using match)
+
+default_platform :mac
+
+platform :mac do
+  desc "Build for development"
+  lane :build_dev do
+    xcodebuild(
+      project: "KeyLoom.xcodeproj",
+      scheme: "KeyLoom",
+      configuration: "Debug",
+      derived_data_path: "build"
+    )
+  end
+
+  desc "Build for release (distribution)"
+  lane :build_release do |options|
+    xcodebuild(
+      project: "KeyLoom.xcodeproj",
+      scheme: "KeyLoom",
+      configuration: "Release",
+      derived_data_path: "build",
+      code_signing_identity: "Developer ID Application",
+      other_code_sign_flags: "--timestamp"
+    )
+  end
+
+  desc "Run tests"
+  lane :test do
+    xcodebuild(
+      project: "KeyLoom.xcodeproj",
+      scheme: "KeyLoom",
+      configuration: "Debug",
+      derived_data_path: "build",
+      sdk: "macosx"
+    )
+  end
+
+  desc "Create DMG"
+  lane :dmg do
+    app_path = "build/Build/Products/Release/KeyLoom.app"
+    version = get_version_number_from_plist(target: "KeyLoom")
+    dmg_name = "KeyLoom-#{version}.dmg"
+
+    sh "mkdir -p build/DMG"
+    sh "cp -R '#{app_path}' build/DMG/"
+    sh "ln -s /Applications build/DMG/Applications"
+    sh "hdiutil create -volname 'KeyLoom' -srcfolder build/DMG -ov -format UDZO '#{dmg_name}'"
+    sh "rm -rf build/DMG"
+  end
+
+  desc "Notarize the app"
+  lane :notarize do
+    app_path = "build/Build/Products/Release/KeyLoom.app"
+    version = get_version_number_from_plist(target: "KeyLoom")
+    dmg_name = "KeyLoom-#{version}.dmg"
+
+    notarize(
+      package: dmg_name,
+      api_key_path: nil, # uses APPLE_ID/TEAM_ID/PASSWORD from env
+      staple: true
+    )
+
+    # Staple the ticket to the app as well
+    sh "xcrun stapler staple '#{app_path}'"
+  end
+
+  desc "Full release: build → DMG → notarize"
+  lane :release do
+    build_release
+    dmg
+    notarize
+  end
+
+  desc "Bump version and commit"
+  lane :bump do |options|
+    increment_version_number_in_plist(
+      target: "KeyLoom",
+      version_number: options[:version]
+    )
+    increment_build_number_in_plist(
+      target: "KeyLoom"
+    )
+    sh "git add KeyLoom/Info.plist KeyLoom.xcodeproj/project.pbxproj"
+    sh "git commit -m 'chore: bump version to #{options[:version]}'"
+    sh "git tag 'v#{options[:version]}'"
+  end
+end

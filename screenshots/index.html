@@ -864,9 +864,423 @@
   .card-sub { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.3); margin-top: 3px; }
 
   /* Video section */
-  .video-container {
-    padding: 20px;
+  .video-container { padding: 16px; }
+  .kb-video-player {
+    position: relative;
+    width: 100%;
+    min-width: 950px;
+    background: linear-gradient(145deg, #0f0f1a, #0a0a14);
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow:
+      0 24px 80px rgba(0,0,0,0.6),
+      0 8px 32px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.03);
+    font-family: 'Elms Sans', sans-serif;
   }
+  .kb-video {
+    width: 100%;
+    display: block;
+    cursor: pointer;
+    background: #000;
+  }
+
+  /* Center overlay */
+  .kb-video-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%);
+    transition: opacity 0.35s ease;
+    cursor: pointer;
+    z-index: 2;
+  }
+  .kb-video-overlay.hidden { opacity: 0; pointer-events: none; }
+
+  /* Big play key */
+  .kb-video-play {
+    width: 80px; height: 80px;
+    border-radius: 16px;
+    border: none;
+    background: linear-gradient(145deg, #2a2a48, #1e1e36);
+    color: #a5b4fc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.22,1,0.36,1);
+    box-shadow:
+      0 6px 0 0 #12121f,
+      0 8px 0 0 #0a0a14,
+      0 12px 40px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      inset 0 -1px 0 rgba(0,0,0,0.3);
+    position: relative;
+  }
+  .kb-video-play::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
+    border-radius: 16px 16px 0 0;
+    pointer-events: none;
+  }
+  .kb-video-play svg { margin-left: 4px; transition: transform 0.2s; }
+  .kb-video-play:hover {
+    transform: translateY(-3px);
+    background: linear-gradient(145deg, #32325a, #262648);
+    color: #c7d2fe;
+    box-shadow:
+      0 8px 0 0 #12121f,
+      0 10px 0 0 #0a0a14,
+      0 16px 50px rgba(99,102,241,0.25),
+      inset 0 1px 0 rgba(255,255,255,0.1),
+      inset 0 -1px 0 rgba(0,0,0,0.3);
+  }
+  .kb-video-play:hover svg { transform: scale(1.1); }
+  .kb-video-play:active {
+    transform: translateY(3px);
+    box-shadow:
+      0 2px 0 0 #12121f,
+      0 3px 0 0 #0a0a14,
+      0 4px 16px rgba(0,0,0,0.4),
+      inset 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  /* Bottom bar - keyboard tray */
+  .kb-video-controls {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: linear-gradient(180deg, rgba(15,15,26,0.0) 0%, rgba(15,15,26,0.95) 30%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 3;
+  }
+  .kb-video-player:hover .kb-video-controls { opacity: 1; }
+
+  /* Key-style buttons */
+  .kb-video-btn {
+    width: 34px; height: 30px;
+    border-radius: 6px;
+    border: none;
+    background: linear-gradient(145deg, #22223a, #1a1a30);
+    color: rgba(255,255,255,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    flex-shrink: 0;
+    box-shadow:
+      3px 3px 8px rgba(0,0,0,0.5),
+      -1px -1px 6px rgba(255,255,255,0.02),
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      inset 0 -1px 2px rgba(0,0,0,0.2);
+    position: relative;
+  }
+  .kb-video-btn::before {
+    content: '';
+    position: absolute;
+    top: 1px; left: 3px; right: 3px;
+    height: 40%;
+    border-radius: 5px 5px 50% 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent);
+    pointer-events: none;
+  }
+  .kb-video-btn:hover {
+    background: linear-gradient(145deg, #2a2a4a, #222240);
+    color: #a5b4fc;
+  }
+  .kb-video-btn:active {
+    transform: translateY(2px);
+    box-shadow:
+      1px 1px 3px rgba(0,0,0,0.5),
+      inset 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .kb-video-btn.active {
+    background: linear-gradient(145deg, #3730a3, #2e2690);
+    color: #fff;
+    box-shadow:
+      3px 3px 8px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.1),
+      0 0 12px rgba(99,102,241,0.15);
+  }
+
+  /* Progress track - like a keyboard trackpad */
+  .kb-video-progress {
+    flex: 1;
+    height: 5px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    transition: height 0.15s ease;
+    border: 1px solid rgba(255,255,255,0.03);
+  }
+  .kb-video-progress:hover { height: 7px; }
+  .kb-video-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #818cf8);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.1s linear;
+    position: relative;
+  }
+  .kb-video-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.25), transparent);
+    border-radius: 3px 3px 0 0;
+  }
+  .kb-video-progress-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #e0e7ff, #c7d2fe);
+    box-shadow: 0 0 10px rgba(99,102,241,0.5), 0 2px 6px rgba(0,0,0,0.3);
+    left: 0%;
+    transition: transform 0.15s ease;
+    pointer-events: none;
+  }
+  .kb-video-progress:hover .kb-video-progress-thumb {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* Time display */
+  .kb-video-time {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.45);
+    white-space: nowrap;
+    min-width: 85px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Volume slider */
+  .kb-video-volume {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .kb-video-volume-slider {
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: width 0.25s ease, opacity 0.2s ease;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+  }
+  .kb-video-volume:hover .kb-video-volume-slider,
+  .kb-video-volume.slider-active .kb-video-volume-slider {
+    width: 70px;
+    opacity: 1;
+  }
+  .kb-video-volume-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #818cf8);
+    border-radius: 2px;
+    width: 80%;
+    position: relative;
+  }
+  .kb-video-volume-fill::after {
+    content: '';
+    position: absolute;
+    top: -3px; right: -5px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(99,102,241,0.4);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .kb-video-volume:hover .kb-video-volume-fill::after { opacity: 1; }
+
+  /* Speed selector */
+  .kb-video-speed {
+    position: relative;
+  }
+  .kb-video-speed-btn {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    min-width: 38px;
+    padding: 0 6px;
+  }
+  .kb-video-speed-menu {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    background: linear-gradient(145deg, #1e1e32, #161628);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(6px);
+    transition: all 0.2s ease;
+    z-index: 10;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    min-width: 80px;
+  }
+  .kb-video-speed.open .kb-video-speed-menu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .kb-video-speed-option {
+    display: block;
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.45);
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    font-family: 'Elms Sans', sans-serif;
+  }
+  .kb-video-speed-option:hover {
+    background: rgba(99,102,241,0.1);
+    color: rgba(255,255,255,0.8);
+  }
+  .kb-video-speed-option.active {
+    color: #818cf8;
+    background: rgba(99,102,241,0.12);
+  }
+
+  /* Keyboard shortcut hints */
+  .kb-video-shortcuts {
+    position: absolute;
+    top: 12px; right: 12px;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 4;
+  }
+  .kb-video-player:hover .kb-video-shortcuts { opacity: 1; }
+  .kb-video-shortcut {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .kb-video-shortcut kbd {
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.06);
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .kb-video-shortcut span {
+    font-size: 9px;
+    color: rgba(255,255,255,0.3);
+    font-weight: 500;
+  }
+
+  /* Keyboard overlay on video */
+  .kb-video-kb-overlay {
+    position: absolute;
+    bottom: 60px; left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 3px;
+    padding: 8px 12px;
+    background: rgba(15,15,26,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.05);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 5;
+  }
+  .kb-video-kb-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .kb-video-kb-key {
+    min-width: 28px; height: 28px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    background: linear-gradient(145deg, #22223a, #1a1a30);
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow:
+      2px 2px 6px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    transition: all 0.15s ease;
+  }
+  .kb-video-kb-key.pressed {
+    transform: translateY(2px);
+    background: linear-gradient(145deg, #3730a3, #2e2690);
+    color: #fff;
+    box-shadow:
+      1px 1px 3px rgba(0,0,0,0.4),
+      inset 0 2px 4px rgba(0,0,0,0.3),
+      0 0 10px rgba(99,102,241,0.3);
+  }
+  .kb-video-kb-key.space {
+    min-width: 100px;
+  }
+
+  /* Tooltip */
+  .kb-video-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    padding: 5px 10px;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+  .kb-video-btn:hover .kb-video-tooltip,
+  .kb-video-speed:hover .kb-video-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
   .video-placeholder {
     width: 100%;
     min-width: 950px;
@@ -881,10 +1295,11 @@
     color: rgba(255,255,255,0.25);
     border: 1px dashed rgba(255,255,255,0.08);
   }
-  .video-placeholder p {
-    font-size: 13px;
-    font-weight: 500;
-  }
+  .video-placeholder p { font-size: 13px; font-weight: 500; }
+
+  /* Auto-hide controls */
+  .kb-video-player.controls-hidden .kb-video-controls { opacity: 0; pointer-events: none; }
+  .kb-video-player.controls-hidden .kb-video-shortcuts { opacity: 0; }
 
   /* Screenshots gallery */
   .ss-gallery {
@@ -1457,7 +1872,10 @@
     .footer-cards { gap: 8px; }
     .footer-card-inner { padding: 10px 16px; font-size: 12px; }
     .video-placeholder { min-width: 0; height: 280px; }
+    .kb-video-player { min-width: 0; }
     .video-container { padding: 0; }
+    .kb-video-volume { display: none; }
+    .kb-video-shortcuts { display: none; }
   }
   @media (max-width: 480px) {
     .hero h1 { font-size: 26px; }
@@ -1470,6 +1888,16 @@
     .feat h3 { font-size: 13px; }
     .feat p { font-size: 11px; }
     .video-placeholder { height: 200px; }
+    .kb-video-play { width: 56px; height: 56px; border-radius: 12px; }
+    .kb-video-play svg { width: 24px; height: 24px; }
+    .kb-video-controls { padding: 6px 8px; gap: 4px; }
+    .kb-video-btn { width: 28px; height: 26px; }
+    .kb-video-btn svg { width: 12px; height: 12px; }
+    .kb-video-time { font-size: 10px; min-width: 55px; }
+    .kb-video-shortcuts { display: none; }
+    .kb-video-speed-btn { font-size: 9px; min-width: 32px; }
+    .kb-video-kb-overlay { display: none; }
+    .kb-video-tooltip { display: none; }
     .footer-cards { gap: 8px; }
     .footer-card-inner { padding: 10px 14px; font-size: 12px; }
   }
@@ -2185,9 +2613,89 @@
     </div>
     <div class="tray-surface" style="height:auto;opacity:1;overflow:visible;">
       <div class="video-container">
-        <div class="video-placeholder">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <p>Video demo coming soon</p>
+        <div class="kb-video-player" id="kb-video-player" tabindex="0">
+          <video class="kb-video" id="kb-video" preload="metadata" playsinline>
+            <source src="short-clip.MOV" type="video/mp4">
+          </video>
+
+          <!-- Center overlay -->
+          <div class="kb-video-overlay" id="kb-video-overlay">
+            <button class="kb-video-play" id="kb-video-play" aria-label="Play video">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            </button>
+          </div>
+
+          <!-- Shortcut hints -->
+          <div class="kb-video-shortcuts">
+            <div class="kb-video-shortcut"><kbd>Space</kbd><span>Play</span></div>
+            <div class="kb-video-shortcut"><kbd>&larr;</kbd><kbd>&rarr;</kbd><span>Seek</span></div>
+            <div class="kb-video-shortcut"><kbd>F</kbd><span>Full</span></div>
+          </div>
+
+          <!-- Keyboard overlay -->
+          <div class="kb-video-kb-overlay" id="kb-video-kb-overlay">
+            <div class="kb-video-kb-key" data-vkey="Q">Q</div>
+            <div class="kb-video-kb-key" data-vkey="W">W</div>
+            <div class="kb-video-kb-key" data-vkey="E">E</div>
+            <div class="kb-video-kb-key" data-vkey="R">R</div>
+            <div class="kb-video-kb-key" data-vkey="T">T</div>
+            <div class="kb-video-kb-key" data-vkey="Y">Y</div>
+            <div class="kb-video-kb-key" data-vkey="U">U</div>
+            <div class="kb-video-kb-key" data-vkey="I">I</div>
+            <div class="kb-video-kb-key" data-vkey="O">O</div>
+            <div class="kb-video-kb-key" data-vkey="P">P</div>
+          </div>
+
+          <!-- Controls bar -->
+          <div class="kb-video-controls" id="kb-video-controls">
+            <button class="kb-video-btn" id="kb-video-toggle" aria-label="Play/Pause">
+              <svg class="kb-icon-play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+              <svg class="kb-icon-pause" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+              <div class="kb-video-tooltip">Play (Space)</div>
+            </button>
+
+            <div class="kb-video-progress" id="kb-video-progress">
+              <div class="kb-video-progress-bar" id="kb-video-progress-bar"></div>
+              <div class="kb-video-progress-thumb" id="kb-video-progress-thumb"></div>
+            </div>
+
+            <span class="kb-video-time" id="kb-video-time">0:00 / 0:00</span>
+
+            <div class="kb-video-volume" id="kb-video-volume">
+              <button class="kb-video-btn" id="kb-video-mute" aria-label="Mute">
+                <svg class="kb-icon-volume" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                <svg class="kb-icon-muted" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+                <div class="kb-video-tooltip">Mute (M)</div>
+              </button>
+              <div class="kb-video-volume-slider" id="kb-video-volume-slider">
+                <div class="kb-video-volume-fill" id="kb-video-volume-fill"></div>
+              </div>
+            </div>
+
+            <div class="kb-video-speed kb-video-speed" id="kb-video-speed">
+              <button class="kb-video-btn kb-video-speed-btn" id="kb-video-speed-btn" aria-label="Playback speed">1x</button>
+              <div class="kb-video-speed-menu" id="kb-video-speed-menu">
+                <button class="kb-video-speed-option" data-speed="0.25">0.25x</button>
+                <button class="kb-video-speed-option" data-speed="0.5">0.5x</button>
+                <button class="kb-video-speed-option" data-speed="0.75">0.75x</button>
+                <button class="kb-video-speed-option active" data-speed="1">1x</button>
+                <button class="kb-video-speed-option" data-speed="1.5">1.5x</button>
+                <button class="kb-video-speed-option" data-speed="2">2x</button>
+              </div>
+              <div class="kb-video-tooltip">Speed</div>
+            </div>
+
+            <button class="kb-video-btn" id="kb-video-kb-toggle" aria-label="Toggle keyboard overlay">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6.01" y2="8"/><line x1="10" y1="8" x2="10.01" y2="8"/><line x1="14" y1="8" x2="14.01" y2="8"/><line x1="18" y1="8" x2="18.01" y2="8"/><line x1="6" y1="12" x2="6.01" y2="12"/><line x1="10" y1="12" x2="10.01" y2="12"/><line x1="14" y1="12" x2="14.01" y2="12"/><line x1="18" y1="12" x2="18.01" y2="12"/><line x1="8" y1="16" x2="16" y2="16"/></svg>
+              <div class="kb-video-tooltip">Keyboard (K)</div>
+            </button>
+
+            <button class="kb-video-btn" id="kb-video-fullscreen" aria-label="Fullscreen">
+              <svg class="kb-icon-expand" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+              <svg class="kb-icon-shrink" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>
+              <div class="kb-video-tooltip">Fullscreen (F)</div>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -3304,6 +3812,289 @@ document.addEventListener('DOMContentLoaded', () => {
       requestAnimationFrame(loop);
     })();
   });
+
+  // ═══════════════════════════════════════════════════════════════
+  // KEYBOARD-THEMED VIDEO PLAYER
+  // ═══════════════════════════════════════════════════════════════
+  (() => {
+    const video = document.getElementById('kb-video');
+    const overlay = document.getElementById('kb-video-overlay');
+    const playBtn = document.getElementById('kb-video-play');
+    const toggleBtn = document.getElementById('kb-video-toggle');
+    const iconPlay = toggleBtn?.querySelector('.kb-icon-play');
+    const iconPause = toggleBtn?.querySelector('.kb-icon-pause');
+    const progress = document.getElementById('kb-video-progress');
+    const progressBar = document.getElementById('kb-video-progress-bar');
+    const progressThumb = document.getElementById('kb-video-progress-thumb');
+    const timeDisplay = document.getElementById('kb-video-time');
+    const fullscreenBtn = document.getElementById('kb-video-fullscreen');
+    const iconExpand = fullscreenBtn?.querySelector('.kb-icon-expand');
+    const iconShrink = fullscreenBtn?.querySelector('.kb-icon-shrink');
+    const muteBtn = document.getElementById('kb-video-mute');
+    const iconVolume = muteBtn?.querySelector('.kb-icon-volume');
+    const iconMuted = muteBtn?.querySelector('.kb-icon-muted');
+    const volumeSlider = document.getElementById('kb-video-volume-slider');
+    const volumeFill = document.getElementById('kb-video-volume-fill');
+    const speedBtn = document.getElementById('kb-video-speed-btn');
+    const speedMenu = document.getElementById('kb-video-speed-menu');
+    const speedContainer = document.getElementById('kb-video-speed');
+    const kbOverlay = document.getElementById('kb-video-kb-overlay');
+    const kbToggleBtn = document.getElementById('kb-video-kb-toggle');
+    const player = document.getElementById('kb-video-player');
+    if (!video || !player) return;
+
+    let isSeeking = false;
+    let hideControlsTimer = null;
+    let lastVolume = 0.8;
+
+    // ── Helpers ──────────────────────────────────────────────
+    function formatTime(s) {
+      if (isNaN(s)) return '0:00';
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60);
+      return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+    // ── Play / Pause ─────────────────────────────────────────
+    function togglePlay() {
+      video.paused ? video.play() : video.pause();
+    }
+
+    function updatePlayIcon() {
+      if (video.paused) {
+        iconPlay.style.display = '';
+        iconPause.style.display = 'none';
+        overlay.classList.remove('hidden');
+      } else {
+        iconPlay.style.display = 'none';
+        iconPause.style.display = '';
+        overlay.classList.add('hidden');
+      }
+    }
+
+    video.addEventListener('play', updatePlayIcon);
+    video.addEventListener('pause', updatePlayIcon);
+    video.addEventListener('ended', () => {
+      updatePlayIcon();
+      overlay.classList.remove('hidden');
+    });
+
+    playBtn?.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
+    overlay?.addEventListener('click', togglePlay);
+    video.addEventListener('click', togglePlay);
+    toggleBtn?.addEventListener('click', togglePlay);
+
+    // ── Progress bar ─────────────────────────────────────────
+    function updateUI() {
+      if (!isSeeking && video.duration) {
+        const pct = (video.currentTime / video.duration) * 100;
+        progressBar.style.width = pct + '%';
+        progressThumb.style.left = pct + '%';
+        timeDisplay.textContent = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
+      }
+    }
+
+    function seekTo(e) {
+      const rect = progress.getBoundingClientRect();
+      const pct = clamp((e.clientX - rect.left) / rect.width, 0, 1);
+      video.currentTime = pct * video.duration;
+      progressBar.style.width = (pct * 100) + '%';
+      progressThumb.style.left = (pct * 100) + '%';
+    }
+
+    progress?.addEventListener('mousedown', (e) => {
+      isSeeking = true;
+      seekTo(e);
+      const onMove = (ev) => seekTo(ev);
+      const onUp = () => { isSeeking = false; window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    });
+
+    video.addEventListener('timeupdate', updateUI);
+    video.addEventListener('loadedmetadata', updateUI);
+
+    // ── Volume ───────────────────────────────────────────────
+    function updateVolumeIcon() {
+      if (video.muted || video.volume === 0) {
+        iconVolume.style.display = 'none';
+        iconMuted.style.display = '';
+      } else {
+        iconVolume.style.display = '';
+        iconMuted.style.display = 'none';
+      }
+      volumeFill.style.width = (video.muted ? 0 : video.volume * 100) + '%';
+    }
+
+    muteBtn?.addEventListener('click', () => {
+      if (video.muted) {
+        video.muted = false;
+        video.volume = lastVolume || 0.8;
+      } else {
+        lastVolume = video.volume;
+        video.muted = true;
+      }
+      updateVolumeIcon();
+    });
+
+    volumeSlider?.addEventListener('mousedown', (e) => {
+      const rect = volumeSlider.getBoundingClientRect();
+      const setVol = (ev) => {
+        const pct = clamp((ev.clientX - rect.left) / rect.width, 0, 1);
+        video.volume = pct;
+        video.muted = pct === 0;
+        lastVolume = pct || lastVolume;
+        updateVolumeIcon();
+      };
+      setVol(e);
+      const onMove = (ev) => setVol(ev);
+      const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    });
+
+    video.addEventListener('volumechange', updateVolumeIcon);
+    video.volume = 0.8;
+    updateVolumeIcon();
+
+    // ── Playback speed ───────────────────────────────────────
+    let speedOpen = false;
+    function toggleSpeed() {
+      speedOpen = !speedOpen;
+      speedContainer.classList.toggle('open', speedOpen);
+    }
+    function closeSpeed() {
+      speedOpen = false;
+      speedContainer.classList.remove('open');
+    }
+
+    speedBtn?.addEventListener('click', (e) => { e.stopPropagation(); toggleSpeed(); });
+
+    speedMenu?.querySelectorAll('.kb-video-speed-option').forEach(opt => {
+      opt.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const spd = parseFloat(opt.dataset.speed);
+        video.playbackRate = spd;
+        speedBtn.textContent = spd === 1 ? '1x' : spd + 'x';
+        speedMenu.querySelectorAll('.kb-video-speed-option').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        closeSpeed();
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!speedContainer?.contains(e.target)) closeSpeed();
+    });
+
+    // ── Keyboard overlay toggle ──────────────────────────────
+    let kbOverlayVisible = false;
+    kbToggleBtn?.addEventListener('click', () => {
+      kbOverlayVisible = !kbOverlayVisible;
+      kbOverlay.classList.toggle('show', kbOverlayVisible);
+      kbToggleBtn.classList.toggle('active', kbOverlayVisible);
+    });
+
+    // Animate keyboard keys when video plays
+    const kbKeys = kbOverlay?.querySelectorAll('.kb-video-kb-key');
+    let kbAnimInterval = null;
+    function startKbAnim() {
+      if (kbAnimInterval) return;
+      kbAnimInterval = setInterval(() => {
+        if (!kbKeys || video.paused) return;
+        const idx = Math.floor(Math.random() * kbKeys.length);
+        const key = kbKeys[idx];
+        key.classList.add('pressed');
+        setTimeout(() => key.classList.remove('pressed'), 180);
+      }, 120);
+    }
+    function stopKbAnim() {
+      clearInterval(kbAnimInterval);
+      kbAnimInterval = null;
+      kbKeys?.forEach(k => k.classList.remove('pressed'));
+    }
+    video.addEventListener('play', startKbAnim);
+    video.addEventListener('pause', stopKbAnim);
+    video.addEventListener('ended', stopKbAnim);
+
+    // ── Fullscreen ───────────────────────────────────────────
+    function updateFullscreenIcon() {
+      const isFs = !!document.fullscreenElement;
+      iconExpand.style.display = isFs ? 'none' : '';
+      iconShrink.style.display = isFs ? '' : 'none';
+    }
+
+    fullscreenBtn?.addEventListener('click', () => {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else player.requestFullscreen();
+    });
+    document.addEventListener('fullscreenchange', updateFullscreenIcon);
+
+    // ── Auto-hide controls ───────────────────────────────────
+    function showControls() {
+      player.classList.remove('controls-hidden');
+      clearTimeout(hideControlsTimer);
+      if (!video.paused) {
+        hideControlsTimer = setTimeout(() => {
+          if (!video.paused) player.classList.add('controls-hidden');
+        }, 3000);
+      }
+    }
+
+    player.addEventListener('mousemove', showControls);
+    player.addEventListener('mouseleave', () => {
+      if (!video.paused) {
+        hideControlsTimer = setTimeout(() => player.classList.add('controls-hidden'), 1000);
+      }
+    });
+    video.addEventListener('play', showControls);
+    video.addEventListener('pause', () => {
+      clearTimeout(hideControlsTimer);
+      player.classList.remove('controls-hidden');
+    });
+
+    // ── Keyboard shortcuts ───────────────────────────────────
+    player.addEventListener('keydown', (e) => {
+      if (e.target.closest('.kb-video-speed-menu')) return;
+      switch (e.code) {
+        case 'Space':
+          e.preventDefault(); togglePlay(); break;
+        case 'ArrowLeft':
+          e.preventDefault(); video.currentTime = Math.max(0, video.currentTime - 5); break;
+        case 'ArrowRight':
+          e.preventDefault(); video.currentTime = Math.min(video.duration || 0, video.currentTime + 5); break;
+        case 'ArrowUp':
+          e.preventDefault(); video.volume = clamp(video.volume + 0.1, 0, 1); video.muted = false; updateVolumeIcon(); break;
+        case 'ArrowDown':
+          e.preventDefault(); video.volume = clamp(video.volume - 0.1, 0, 1); updateVolumeIcon(); break;
+        case 'KeyF':
+          fullscreenBtn?.click(); break;
+        case 'KeyM':
+          muteBtn?.click(); break;
+        case 'KeyK':
+          kbToggleBtn?.click(); break;
+        case 'Comma':
+          if (e.shiftKey) { const opts = speedMenu?.querySelectorAll('.kb-video-speed-option'); const cur = video.playbackRate; const speeds = [0.25,0.5,0.75,1,1.5,2]; const i = speeds.indexOf(cur); if (i > 0) opts?.[i-1]?.click(); }
+          break;
+        case 'Period':
+          if (e.shiftKey) { const opts = speedMenu?.querySelectorAll('.kb-video-speed-option'); const cur = video.playbackRate; const speeds = [0.25,0.5,0.75,1,1.5,2]; const i = speeds.indexOf(cur); if (i < speeds.length-1) opts?.[i+1]?.click(); }
+          break;
+      }
+      showControls();
+    });
+
+    // ── Double-click for fullscreen ──────────────────────────
+    let lastClick = 0;
+    video.addEventListener('click', (e) => {
+      const now = Date.now();
+      if (now - lastClick < 300) {
+        fullscreenBtn?.click();
+        e.stopPropagation();
+      }
+      lastClick = now;
+    });
+  })();
 })();
 </script>
 </body>

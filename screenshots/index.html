@@ -35,6 +35,34 @@
     overflow-x: hidden;
   }
 
+  /* === FLOATING KEYS === */
+  .bg-keys {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bg-key {
+    position: absolute;
+    font-family: 'Elms Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(99,102,241,0.06);
+    border: 1px solid rgba(99,102,241,0.04);
+    border-radius: 6px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.01);
+    animation: drift linear infinite;
+    will-change: transform;
+  }
+  @keyframes drift {
+    0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-10vh) rotate(var(--rot)); opacity: 0; }
+  }
+
   /* === HERO === */
   .hero {
     position: relative;
@@ -1743,6 +1771,7 @@
 </style>
 </head>
 <body>
+<div class="bg-keys" id="bg-keys"></div>
 
 <!-- NAVBAR -->
 <nav class="navbar" id="navbar">
@@ -2216,6 +2245,23 @@
 
 <script>
 (() => {
+  // Floating background keys
+  const KEYS = ['Q','W','E','R','T','Y','U','I','O','P','A','S','D','F','G','H','J','K','L','Z','X','C','V','B','N','M','⌘','⌥','⇧','⇪','⏎','⌫','tab','ctrl','esc','spc'];
+  const bg = document.getElementById('bg-keys');
+  if (bg) {
+    for (let i = 0; i < 20; i++) {
+      const el = document.createElement('div');
+      el.className = 'bg-key';
+      el.textContent = KEYS[Math.floor(Math.random() * KEYS.length)];
+      el.style.left = Math.random() * 100 + '%';
+      el.style.setProperty('--rot', (Math.random() * 60 - 30) + 'deg');
+      el.style.animationDuration = (14 + Math.random() * 20) + 's';
+      el.style.animationDelay = (-Math.random() * 25) + 's';
+      el.style.fontSize = (11 + Math.random() * 6) + 'px';
+      bg.appendChild(el);
+    }
+  }
+
   // Letter effect for hero title and section titles
   function initLetterEffect(el) {
     const text = el.textContent;
@@ -2404,6 +2450,7 @@
       keyEl.addEventListener('mousedown', () => {
         keyEl.classList.add('kb3d-active');
         typeKey(code);
+        playKeySound(300 + Math.random() * 200);
       });
       keyEl.addEventListener('mouseup', () => {
         keyEl.classList.remove('kb3d-active');
@@ -2424,6 +2471,7 @@
       const key = kb3d.querySelector(`[data-key="${e.code}"]`);
       if (key) {
         key.classList.add('kb3d-active');
+        playKeySound(320 + Math.random() * 160);
         // Also type into output if visible
         const out = document.getElementById('kb3d-output');
         if (out && out.style.display !== 'none') {
@@ -2670,8 +2718,33 @@
     requestAnimationFrame(loop);
   })();
 
+  // ── Keyboard Sound System ─────────────────────────────────────
+  let _audioCtx;
+  function getAudioCtx() {
+    if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return _audioCtx;
+  }
+  function playKeySound(freq) {
+    try {
+      const ctx = getAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.12);
+    } catch(e) {}
+  }
+
   document.querySelectorAll('.k').forEach(key => {
-    key.addEventListener('mousedown', () => key.classList.add('pressed'));
+    key.addEventListener('mousedown', () => {
+      key.classList.add('pressed');
+      playKeySound(280 + Math.random() * 180);
+    });
     key.addEventListener('mouseup', () => key.classList.remove('pressed'));
     key.addEventListener('mouseleave', () => key.classList.remove('pressed'));
     key.addEventListener('touchstart', e => { e.preventDefault(); key.classList.add('pressed'); }, {passive:false});

@@ -11,7 +11,30 @@
 		A1000002 /* KeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1100002 /* KeyboardView.swift */; };
 		A1000003 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1100005 /* WelcomeView.swift */; };
 		A1000004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1100006 /* Assets.xcassets */; };
+		A1C00010 /* KeyLoomTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C00002 /* KeyLoomTests.swift */; };
+		A1D00002 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D00001 /* SoundManager.swift */; };
+		A1D00004 /* KeystrokeSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D00003 /* KeystrokeSender.swift */; };
+		A1D00006 /* ClipboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D00005 /* ClipboardManager.swift */; };
+		A1D00008 /* ClipboardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D00007 /* ClipboardViews.swift */; };
+		A1D0000A /* PhysicalShiftMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D00009 /* PhysicalShiftMonitor.swift */; };
+		A1D0000C /* KeyUsageTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D0000B /* KeyUsageTracker.swift */; };
+		A1D0000E /* KeyboardSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D0000D /* KeyboardSettings.swift */; };
+		A1D00010 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D0000F /* SettingsView.swift */; };
+		A1D00012 /* KeyboardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D00011 /* KeyboardState.swift */; };
+		A1D00014 /* KeyModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D00013 /* KeyModel.swift */; };
+		A1D00016 /* KeyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D00015 /* KeyButton.swift */; };
+		A1D00018 /* CollapsedKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D00017 /* CollapsedKeyboardView.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A1C00008 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1900001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1500001;
+			remoteInfo = KeyLoom;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		A1100001 /* KeyLoomApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyLoomApp.swift; sourceTree = "<group>"; };
@@ -21,6 +44,20 @@
 		A1100005 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		A1100006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1200001 /* KeyLoom.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeyLoom.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1C00001 /* KeyLoomTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KeyLoomTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1C00002 /* KeyLoomTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyLoomTests.swift; sourceTree = "<group>"; };
+		A1D00001 /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
+		A1D00003 /* KeystrokeSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeystrokeSender.swift; sourceTree = "<group>"; };
+		A1D00005 /* ClipboardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardManager.swift; sourceTree = "<group>"; };
+		A1D00007 /* ClipboardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardViews.swift; sourceTree = "<group>"; };
+		A1D00009 /* PhysicalShiftMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhysicalShiftMonitor.swift; sourceTree = "<group>"; };
+		A1D0000B /* KeyUsageTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyUsageTracker.swift; sourceTree = "<group>"; };
+		A1D0000D /* KeyboardSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSettings.swift; sourceTree = "<group>"; };
+		A1D0000F /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A1D00011 /* KeyboardState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardState.swift; sourceTree = "<group>"; };
+		A1D00013 /* KeyModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyModel.swift; sourceTree = "<group>"; };
+		A1D00015 /* KeyButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyButton.swift; sourceTree = "<group>"; };
+		A1D00017 /* CollapsedKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollapsedKeyboardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,16 +75,29 @@
 			isa = PBXGroup;
 			children = (
 			A1400002 /* KeyLoom */,
+			A1C00009 /* KeyLoomTests */,
 			A1400003 /* Products */,
 		);
 		sourceTree = "<group>";
 	};
-	A1400002 /* KeyLoom */ = {
-		isa = PBXGroup;
-		children = (
+		A1400002 /* KeyLoom */ = {
+			isa = PBXGroup;
+			children = (
 			A1100001 /* KeyLoomApp.swift */,
 			A1100002 /* KeyboardView.swift */,
 			A1100005 /* WelcomeView.swift */,
+			A1D00001 /* SoundManager.swift */,
+			A1D00003 /* KeystrokeSender.swift */,
+			A1D00005 /* ClipboardManager.swift */,
+			A1D00007 /* ClipboardViews.swift */,
+			A1D00009 /* PhysicalShiftMonitor.swift */,
+			A1D0000B /* KeyUsageTracker.swift */,
+			A1D0000D /* KeyboardSettings.swift */,
+			A1D0000F /* SettingsView.swift */,
+			A1D00011 /* KeyboardState.swift */,
+			A1D00013 /* KeyModel.swift */,
+			A1D00015 /* KeyButton.swift */,
+			A1D00017 /* CollapsedKeyboardView.swift */,
 			A1100006 /* Assets.xcassets */,
 			A1100003 /* Info.plist */,
 			A1100004 /* KeyLoom.entitlements */,
@@ -59,8 +109,17 @@
 			isa = PBXGroup;
 			children = (
 				A1200001 /* KeyLoom.app */,
+				A1C00001 /* KeyLoomTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A1C00009 /* KeyLoomTests */ = {
+			isa = PBXGroup;
+			children = (
+				A1C00002 /* KeyLoomTests.swift */,
+			);
+			path = KeyLoomTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -82,6 +141,23 @@
 			productName = KeyLoom;
 			productReference = A1200001 /* KeyLoom.app */;
 			productType = "com.apple.product-type.application";
+		};
+		A1C00003 /* KeyLoomTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1C00007 /* Build configuration list for PBXNativeTarget "KeyLoomTests" */;
+			buildPhases = (
+				A1C00004 /* Sources */,
+				A1C00012 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A1C00011 /* PBXTargetDependency */,
+			);
+			name = KeyLoomTests;
+			productName = KeyLoomTests;
+			productReference = A1C00001 /* KeyLoomTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -112,6 +188,7 @@
 			projectRoot = "";
 			targets = (
 				A1500001 /* KeyLoom */,
+				A1C00003 /* KeyLoomTests */,
 			);
 		};
 /* End PBXProject section */
@@ -125,7 +202,35 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-/* End PBXResourcesBuildPhase section */
+	/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A1C00004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1C00010 /* KeyLoomTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A1C00011 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			targetProxy = A1C00008 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A1C00012 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		A1700001 /* Sources */ = {
@@ -135,6 +240,18 @@
 				A1000001 /* KeyLoomApp.swift in Sources */,
 				A1000002 /* KeyboardView.swift in Sources */,
 				A1000003 /* WelcomeView.swift in Sources */,
+				A1D00002 /* SoundManager.swift in Sources */,
+				A1D00004 /* KeystrokeSender.swift in Sources */,
+				A1D00006 /* ClipboardManager.swift in Sources */,
+				A1D00008 /* ClipboardViews.swift in Sources */,
+				A1D0000A /* PhysicalShiftMonitor.swift in Sources */,
+				A1D0000C /* KeyUsageTracker.swift in Sources */,
+				A1D0000E /* KeyboardSettings.swift in Sources */,
+				A1D00010 /* SettingsView.swift in Sources */,
+				A1D00012 /* KeyboardState.swift in Sources */,
+				A1D00014 /* KeyModel.swift in Sources */,
+				A1D00016 /* KeyButton.swift in Sources */,
+				A1D00018 /* CollapsedKeyboardView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -306,6 +423,42 @@
 			};
 			name = Release;
 		};
+		A1C00005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fabiconcept.keyloom.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KeyLoom.app/Contents/MacOS/KeyLoom";
+			};
+			name = Debug;
+		};
+		A1C00006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fabiconcept.keyloom.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KeyLoom.app/Contents/MacOS/KeyLoom";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -314,6 +467,15 @@
 			buildConfigurations = (
 				A1A00003 /* Debug */,
 				A1A00004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1C00007 /* Build configuration list for PBXNativeTarget "KeyLoomTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1C00005 /* Debug */,
+				A1C00006 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

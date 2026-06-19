@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - KeyLoom</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@400;700&family=Elms+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      font-family: 'Elms Sans', sans-serif;
+      font-size: 16px;
+      background: #0c0c18;
+      color: rgba(255,255,255,0.7);
+      -webkit-font-smoothing: antialiased;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(12,12,24,0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .nav-logo {
+      font-family: 'Bitcount Prop Single', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #818cf8;
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-back {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-back:hover { color: #818cf8; }
+
+    .content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 120px 24px 80px;
+    }
+
+    h1 {
+      font-family: 'Bitcount Prop Single', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: #818cf8;
+      margin-bottom: 8px;
+      letter-spacing: -1px;
+    }
+
+    h1 .letter, h2 .letter {
+      display: inline-block;
+      transition: letter-spacing 0.25s ease-out, opacity 0.25s ease-out;
+    }
+
+    h1 .letter.shrink, h2 .letter.shrink {
+      letter-spacing: -3px;
+      opacity: 0.6;
+    }
+
+    h1 .letter.mild, h2 .letter.mild {
+      letter-spacing: -1.5px;
+      opacity: 0.8;
+    }
+
+    .updated {
+      font-size: 13px;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-family: 'Bitcount Prop Single', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.85);
+      margin-top: 36px;
+      margin-bottom: 12px;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 16px;
+    }
+
+    ul {
+      list-style: none;
+      margin-bottom: 16px;
+      padding-left: 0;
+    }
+
+    ul li {
+      font-size: 15px;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.55);
+      padding-left: 20px;
+      position: relative;
+      margin-bottom: 6px;
+    }
+
+    ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #6366f1;
+    }
+
+    a {
+      color: #818cf8;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    a:hover { opacity: 0.8; }
+
+    .divider {
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(99,102,241,0.4), transparent);
+      margin: 40px 0;
+    }
+
+    .footer-mini {
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .footer-mini p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.2);
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 28px; }
+      .content { padding: 100px 16px 60px; }
+    }
+
+    /* Floating hero image prop - tablets and desktops only */
+    .floating-hero {
+      display: none;
+    }
+
+    @media (min-width: 768px) {
+      .floating-hero {
+        display: block;
+        position: fixed;
+        top: 0;
+        right: 60px;
+        z-index: 50;
+        opacity: 0.08;
+      }
+
+      .floating-hero-svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 200px;
+        pointer-events: none;
+      }
+
+      .floating-hero-anchor-outer {
+        fill: #333;
+        stroke: #555;
+        stroke-width: 2;
+      }
+
+      .floating-hero-anchor-inner {
+        fill: #B4B2A9;
+      }
+
+      .floating-hero-rope-path {
+        fill: none;
+        stroke: rgba(99,102,241,0.35);
+        stroke-width: 2.5;
+        stroke-linecap: round;
+      }
+
+      .floating-hero-img {
+        width: 280px;
+        position: absolute;
+        top: 0;
+        left: -140px;
+        cursor: grab;
+        pointer-events: auto;
+        transition: filter 0.2s;
+      }
+
+      .floating-hero-img:active {
+        cursor: grabbing;
+      }
+    }
+
+    /* === ENTRANCE ANIMATIONS === */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-up {
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+    .reveal-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .stagger-1 { transition-delay: 0.05s; }
+    .stagger-2 { transition-delay: 0.1s; }
+    .stagger-3 { transition-delay: 0.15s; }
+    .stagger-4 { transition-delay: 0.2s; }
+  </style>
+</head>
+<body>
+
+  <!-- Floating hero image prop -->
+  <div class="floating-hero" id="floating-hero">
+    <svg class="floating-hero-svg" id="floating-hero-svg">
+      <path id="floating-rope-path" class="floating-hero-rope-path" fill="none" stroke="rgba(99,102,241,0.35)" stroke-width="2.5" stroke-linecap="round"/>
+      <circle id="floating-anchor-outer" class="floating-hero-anchor-outer" r="7" fill="#333" stroke="#555" stroke-width="2"/>
+      <circle id="floating-anchor-inner" class="floating-hero-anchor-inner" r="3" fill="#B4B2A9"/>
+    </svg>
+    <img src="final/hero.png" alt="" class="floating-hero-img" id="floating-hero-img">
+  </div>
+
+  <nav class="nav">
+    <a href="preview.html" class="nav-logo">KeyLoom</a>
+    <a href="preview.html" class="nav-back">&larr; Back</a>
+  </nav>
+
+  <div class="content">
+    <h1 id="privacy-title" class="reveal-up">Privacy Policy</h1>
+    <div class="updated reveal stagger-1">Last updated: June 19, 2026</div>
+
+    <p class="reveal stagger-2">KeyLoom ("we", "our", or "us") operates the KeyLoom macOS application. This page informs you of our policies regarding the collection, use, and disclosure of personal information when you use our application.</p>
+
+    <h2 class="section-heading reveal stagger-3">Information Collection</h2>
+    <p class="reveal stagger-3">KeyLoom is designed with privacy in mind. We want to be transparent about what data we handle:</p>
+    <ul class="reveal stagger-4">
+      <li><strong>Keystroke Data:</strong> All keystrokes are processed locally on your device. No keystroke data is transmitted to any external server.</li>
+      <li><strong>Clipboard Data:</strong> Clipboard content is stored locally on your device only. We never access, transmit, or store your clipboard contents on external servers.</li>
+      <li><strong>Usage Analytics:</strong> We do not collect any usage analytics, telemetry, or tracking data.</li>
+    </ul>
+
+    <h2 class="section-heading reveal stagger-1">Data Storage</h2>
+    <p class="reveal stagger-2">All data generated by KeyLoom, including clipboard history, settings, and preferences, is stored exclusively on your local device using macOS system storage. This data never leaves your device unless you explicitly export it.</p>
+
+    <h2 class="section-heading reveal stagger-3">Third-Party Services</h2>
+    <p class="reveal stagger-4">KeyLoom does not integrate with any third-party analytics services, advertising networks, or data brokers. The application operates entirely offline after installation.</p>
+
+    <h2 class="section-heading reveal stagger-1">Permissions</h2>
+    <p class="reveal stagger-2">KeyLoom may request the following macOS permissions:</p>
+    <ul class="reveal stagger-3">
+      <li><strong>Accessibility:</strong> Required to detect keyboard input and simulate key presses across applications.</li>
+      <li><strong>Input Monitoring:</strong> Required to detect physical keyboard state (Shift, Caps Lock).</li>
+    </ul>
+    <p class="reveal stagger-4">These permissions are used solely for the core functionality of the application and are not used to collect personal information beyond what is necessary for the app to operate.</p>
+
+    <h2 class="section-heading reveal stagger-1">Data Sharing</h2>
+    <p class="reveal stagger-2">We do not sell, trade, or otherwise transfer your information to outside parties. This does not include trusted third parties who assist us in operating the application, so long as those parties agree to keep this information confidential.</p>
+
+    <h2 class="section-heading reveal stagger-3">Children's Privacy</h2>
+    <p class="reveal stagger-4">KeyLoom does not knowingly collect personal information from children under 13. If we become aware that we have collected personal information from a child under 13, we will take steps to delete such information promptly.</p>
+
+    <h2 class="section-heading reveal stagger-1">Changes to This Policy</h2>
+    <p class="reveal stagger-2">We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "last updated" date at the top of this page.</p>
+
+    <h2 class="section-heading reveal stagger-3">Contact Us</h2>
+    <p class="reveal stagger-4">If you have any questions about this Privacy Policy, please contact us:</p>
+    <ul class="reveal stagger-4">
+      <li>By email: <a href="mailto:favourajokubi@gmail.com">favourajokubi@gmail.com</a></li>
+      <li>By GitHub: <a href="https://github.com/fabiconcept" target="_blank">github.com/fabiconcept</a></li>
+    </ul>
+
+    <div class="divider reveal"></div>
+  </div>
+
+  <div class="footer-mini reveal">
+    <p>&copy; 2026 KeyLoom. All rights reserved.</p>
+  </div>
+
+  <script>
+  // Verlet rope simulation for floating hero image
+  (() => {
+    const hero = document.getElementById('floating-hero');
+    const svg = document.getElementById('floating-hero-svg');
+    const ropePath = document.getElementById('floating-rope-path');
+    const anchorOuter = document.getElementById('floating-anchor-outer');
+    const anchorInner = document.getElementById('floating-anchor-inner');
+    const img = document.getElementById('floating-hero-img');
+    if (!hero || !svg || !ropePath || !img) return;
+
+    // Only on desktop
+    if (window.innerWidth < 768) return;
+
+    const SEGMENTS = 12;
+    const GRAVITY = 0.5;
+    const DAMPING = 0.92;
+    const ITERATIONS = 15;
+    const ROPE_TOP = 10;
+    const ANCHOR_X = 0;
+
+    let points = [];
+    let ropeRestLen = 0;
+    let dragging = false;
+    let dragOffX = 0;
+    let dragOffY = 0;
+
+    function init() {
+      const ropeHeight = 100;
+      ropeRestLen = ropeHeight / SEGMENTS;
+      points = [];
+      for (let i = 0; i <= SEGMENTS; i++) {
+        points.push({
+          x: ANCHOR_X,
+          y: ROPE_TOP + i * ropeRestLen,
+          px: ANCHOR_X,
+          py: ROPE_TOP + i * ropeRestLen,
+          pinned: i === 0
+        });
+      }
+      anchorOuter.setAttribute('cx', ANCHOR_X);
+      anchorOuter.setAttribute('cy', ROPE_TOP);
+      anchorInner.setAttribute('cx', ANCHOR_X);
+      anchorInner.setAttribute('cy', ROPE_TOP);
+    }
+
+    function integrate() {
+      const tip = points[points.length - 1];
+      for (const p of points) {
+        if (p.pinned) continue;
+        if (p === tip && dragging) continue;
+        const vx = (p.x - p.px) * DAMPING;
+        const vy = (p.y - p.py) * DAMPING;
+        p.px = p.x;
+        p.py = p.y;
+        p.x += vx;
+        p.y += vy + GRAVITY;
+      }
+    }
+
+    function constrain() {
+      for (let iter = 0; iter < ITERATIONS; iter++) {
+        for (let i = 0; i < points.length - 1; i++) {
+          const a = points[i];
+          const b = points[i + 1];
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
+          const diff = (dist - ropeRestLen) / dist * 0.5;
+          const ox = dx * diff;
+          const oy = dy * diff;
+          if (!a.pinned && !(i === 0 && dragging)) { a.x += ox; a.y += oy; }
+          if (!(i + 1 === points.length - 1 && dragging)) { b.x -= ox; b.y -= oy; }
+        }
+        points[0].x = ANCHOR_X;
+        points[0].y = ROPE_TOP;
+      }
+    }
+
+    function render() {
+      let d = `M ${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)}`;
+      for (let i = 1; i < points.length; i++) {
+        d += ` L ${points[i].x.toFixed(2)} ${points[i].y.toFixed(2)}`;
+      }
+      ropePath.setAttribute('d', d);
+
+      const tip = points[points.length - 1];
+      const imgW = img.offsetWidth || 280;
+      img.style.left = (tip.x - imgW / 2).toFixed(2) + 'px';
+      img.style.top = tip.y.toFixed(2) + 'px';
+    }
+
+    function tip() { return points[points.length - 1]; }
+
+    function isOnImage(mx, my) {
+      const t = tip();
+      const imgW = img.offsetWidth || 280;
+      const imgH = img.offsetHeight || 200;
+      return mx >= t.x - imgW / 2 - 8 && mx <= t.x + imgW / 2 + 8 &&
+             my >= t.y - 8 && my <= t.y + imgH + 8;
+    }
+
+    function getPos(e) {
+      const rect = hero.getBoundingClientRect();
+      if (e.touches) {
+        return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+      }
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+
+    function onDragStart(e) {
+      const p = getPos(e);
+      if (isOnImage(p.x, p.y)) {
+        e.preventDefault();
+        dragging = true;
+        const t = tip();
+        dragOffX = t.x - p.x;
+        dragOffY = t.y - p.y;
+        img.style.cursor = 'grabbing';
+      }
+    }
+
+    function onDragMove(e) {
+      if (!dragging) return;
+      e.preventDefault();
+      const p = getPos(e);
+      const t = tip();
+      t.x = p.x + dragOffX;
+      t.y = p.y + dragOffY;
+      t.px = t.x;
+      t.py = t.y;
+    }
+
+    function onDragEnd() {
+      dragging = false;
+      img.style.cursor = 'grab';
+    }
+
+    img.addEventListener('mousedown', onDragStart);
+    img.addEventListener('touchstart', onDragStart, { passive: false });
+    window.addEventListener('mousemove', onDragMove);
+    window.addEventListener('touchmove', onDragMove, { passive: false });
+    window.addEventListener('mouseup', onDragEnd);
+    window.addEventListener('touchend', onDragEnd);
+
+    img.addEventListener('mousemove', e => {
+      if (dragging) return;
+      const p = getPos(e);
+      img.style.cursor = isOnImage(p.x, p.y) ? 'grab' : 'default';
+    });
+
+    function loop() {
+      integrate();
+      constrain();
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    init();
+    loop();
+  })();
+
+  // Letter effect for headings
+  (() => {
+    function initLetterEffect(el) {
+      const text = el.textContent;
+      el.innerHTML = '';
+      const letters = [];
+      text.split('').forEach(ch => {
+        if (ch === ' ') {
+          const space = document.createTextNode(' ');
+          el.appendChild(space);
+          return;
+        }
+        const span = document.createElement('span');
+        span.className = 'letter';
+        span.textContent = ch;
+        el.appendChild(span);
+        letters.push(span);
+      });
+      letters.forEach((span, i) => {
+        span.addEventListener('mouseenter', () => {
+          span.classList.add('shrink');
+          if (i > 0) letters[i - 1].classList.add('mild');
+          if (i < letters.length - 1) letters[i + 1].classList.add('mild');
+        });
+        span.addEventListener('mouseleave', () => {
+          span.classList.remove('shrink');
+          if (i > 0) letters[i - 1].classList.remove('mild');
+          if (i < letters.length - 1) letters[i + 1].classList.remove('mild');
+        });
+      });
+    }
+
+    const title = document.getElementById('privacy-title');
+    if (title) initLetterEffect(title);
+
+    document.querySelectorAll('.section-heading').forEach(h => initLetterEffect(h));
+  })();
+
+  // Entrance animations
+  document.addEventListener('DOMContentLoaded', () => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal, .reveal-up').forEach(el => {
+      observer.observe(el);
+    });
+  });
+  </script>
+</body>
+</html>

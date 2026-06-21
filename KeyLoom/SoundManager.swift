@@ -164,8 +164,9 @@ class SoundManager {
 
     private func play(_ name: String) {
         guard let sound = cache[name] else { return }
-        sound.volume = KeyboardSettings.shared.soundVolume
+        sound.stop()
         sound.currentTime = 0
+        sound.volume = KeyboardSettings.shared.soundVolume
         sound.play()
     }
 }

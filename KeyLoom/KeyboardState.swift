@@ -9,11 +9,13 @@ class KeyboardState: ObservableObject {
         NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             DispatchQueue.main.async {
                 self?.isShifted = event.modifierFlags.contains(.shift)
+                self?.isCaps = event.modifierFlags.contains(.capsLock)
             }
         }
         NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             DispatchQueue.main.async {
                 self?.isShifted = event.modifierFlags.contains(.shift)
+                self?.isCaps = event.modifierFlags.contains(.capsLock)
             }
             return event
         }

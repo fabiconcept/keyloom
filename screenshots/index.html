@@ -2226,7 +2226,7 @@
     <li><a href="#screenshots">Screenshots</a></li>
   </ul>
   <div class="nav-sep"></div>
-  <button class="nav-cta" onclick="window.open('https://github.com/fabiconcept/keyloom','_blank')">Get App</button>
+  <a class="nav-cta" href="https://github.com/fabiconcept/keyloom" target="_blank" rel="noopener">Get App</a>
   <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
@@ -2256,12 +2256,12 @@
   <h1 class="hero-title" id="hero-title">KeyLoom</h1>
   <p class="hero-sub reveal stagger-2">A floating virtual keyboard for macOS. Type into any app with automatic Cmd+V paste.</p>
   <div class="hero-cta reveal stagger-3">
-    <button class="pushable" onclick="window.open('https://github.com/fabiconcept/keyloom','_blank')">
+    <a class="pushable" href="https://github.com/fabiconcept/keyloom" target="_blank" rel="noopener">
       <span class="front">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><line x1="6" y1="8" x2="6.01" y2="8"/><line x1="10" y1="8" x2="10.01" y2="8"/><line x1="14" y1="8" x2="14.01" y2="8"/><line x1="18" y1="8" x2="18.01" y2="8"/><line x1="6" y1="12" x2="6.01" y2="12"/><line x1="10" y1="12" x2="10.01" y2="12"/><line x1="14" y1="12" x2="14.01" y2="12"/><line x1="18" y1="12" x2="18.01" y2="12"/><line x1="8" y1="16" x2="16" y2="16"/></svg>
         Get Application
       </span>
-    </button>
+    </a>
   </div>
   <div class="kb-wrap" id="kb-wrap">
     <svg class="kb-rope" id="kb-rope">
@@ -2464,7 +2464,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const kbBase = document.getElementById('kb-base');
   const kb3d = document.getElementById('kb3d');
-  console.log('[KB-DEBUG] INIT kbBase:', !!kbBase, 'kb3d:', !!kb3d);
   if (!kbBase && !kb3d) return;
   let heroShift = false;
   let heroCaps = false;
@@ -2478,10 +2477,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!sh) return;
       const isLetter = ch.length === 1 && /[a-z]/i.test(ch);
       const showShift = isLetter ? (heroCaps ? !heroShift : heroShift) : heroShift;
-      const oldText = k.textContent;
-      const newText = showShift ? sh : ch;
-      if (oldText !== newText) console.log(`[KB-DEBUG] hero '${ch}': caps=${heroCaps} shift=${heroShift} letter=${isLetter} → showShift=${showShift} '${oldText}'→'${newText}'`);
-      k.textContent = newText;
+      k.textContent = showShift ? sh : ch;
     });
     if (heroCaps) { kbBase.classList.add('caps-on'); } else { kbBase.classList.remove('caps-on'); }
   }
@@ -2496,29 +2492,35 @@ document.addEventListener('DOMContentLoaded', () => {
       const span = k.querySelector('span');
       const isLetter = ch.length === 1 && /[a-z]/i.test(ch);
       const showShift = isLetter ? (heroCaps ? !heroShift : heroShift) : heroShift;
-      let mainText = '';
-      for (const node of k.childNodes) { if (node.nodeType === 3) { mainText = node.textContent; break; } }
       const newMain = showShift ? sh : ch;
       const newSpan = showShift ? ch : sh;
-      if (mainText !== newMain) console.log(`[KB-DEBUG] 3d '${ch}': caps=${heroCaps} shift=${heroShift} letter=${isLetter} → showShift=${showShift} main='${mainText}'→'${newMain}'`);
       for (const node of k.childNodes) { if (node.nodeType === 3) { node.textContent = newMain; break; } }
       if (span) span.textContent = newSpan;
     });
   }
 
   function updateAllKeys() {
-    console.log(`[KB-DEBUG] updateAllKeys → shift:${heroShift} caps:${heroCaps}`);
     updateHeroKeys();
     update3DKeys();
   }
 
+  // ── CapsLock detection (derives from real modifier state) ────
+  const capsKey3d = kb3d ? kb3d.querySelector('[data-key="CapsLock"]') : null;
+  function updateCapsVisual() {
+    if (capsKey3d) capsKey3d.classList.toggle('kb3d-active', heroCaps);
+  }
+
+  // ── Keyboard event handlers ──────────────────────────────────
   document.addEventListener('keydown', e => {
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
       if (!heroShift) { heroShift = true; updateAllKeys(); }
     }
-    if (e.code === 'CapsLock') {
-      heroCaps = !heroCaps;
+    // Read real capslock from hardware — no toggle needed
+    const realCaps = !!(e.getModifierState && e.getModifierState('CapsLock'));
+    if (realCaps !== heroCaps) {
+      heroCaps = realCaps;
       updateAllKeys();
+      updateCapsVisual();
     }
   });
   document.addEventListener('keyup', e => {
@@ -2526,24 +2528,39 @@ document.addEventListener('DOMContentLoaded', () => {
       heroShift = false;
       updateAllKeys();
     }
+    // Re-check on keyup in case capslock toggled
+    const realCaps = !!(e.getModifierState && e.getModifierState('CapsLock'));
+    if (realCaps !== heroCaps) {
+      heroCaps = realCaps;
+      updateAllKeys();
+      updateCapsVisual();
+    }
   });
 
+  // ── On-screen button clicks (simulated — no hardware event) ─
   if (kbBase) {
     kbBase.querySelectorAll('.hero-shift-btn').forEach(btn => {
       btn.addEventListener('click', () => { heroShift = !heroShift; updateAllKeys(); });
     });
     kbBase.querySelectorAll('.hero-caps-btn').forEach(btn => {
-      btn.addEventListener('click', () => { heroCaps = !heroCaps; updateAllKeys(); });
+      btn.addEventListener('click', () => {
+        heroCaps = !heroCaps;
+        updateAllKeys();
+        updateCapsVisual();
+      });
     });
   }
   if (kb3d) {
-    const capsKey = kb3d.querySelector('[data-key="CapsLock"]');
-    if (capsKey) capsKey.addEventListener('click', () => { heroCaps = !heroCaps; updateAllKeys(); });
+    if (capsKey3d) capsKey3d.addEventListener('click', () => {
+      heroCaps = !heroCaps;
+      updateAllKeys();
+      updateCapsVisual();
+    });
     kb3d.querySelectorAll('[data-key="ShiftLeft"],[data-key="ShiftRight"]').forEach(btn => {
       btn.addEventListener('click', () => { heroShift = !heroShift; updateAllKeys(); });
     });
   }
-  console.log('[KB-DEBUG] READY');
+  updateCapsVisual();
 });
 </script>
 

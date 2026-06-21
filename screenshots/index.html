@@ -2316,7 +2316,7 @@
       const sh = k.getAttribute('data-shift');
       if (!sh) return;
       const isLetter = ch.length === 1 && /[a-z]/i.test(ch);
-      const showShift = heroShift || (heroCaps && isLetter);
+      const showShift = isLetter ? (heroCaps ? !heroShift : heroShift) : heroShift;
       k.textContent = showShift ? sh : ch;
     });
     if (heroCaps) {
@@ -2336,7 +2336,7 @@
       if (!sh) return;
       const span = k.querySelector('span');
       const isLetter = ch.length === 1 && /[a-z]/i.test(ch);
-      const showShift = heroShift || (heroCaps && isLetter);
+      const showShift = isLetter ? (heroCaps ? !heroShift : heroShift) : heroShift;
       for (const node of k.childNodes) {
         if (node.nodeType === 3) {
           node.textContent = showShift ? sh : ch;
@@ -2355,7 +2355,6 @@
     }
     if (e.code === 'CapsLock') {
       heroCaps = !heroCaps;
-      heroShift = false;
       updateAllKeys();
     }
   });
@@ -2371,12 +2370,12 @@
       btn.addEventListener('click', () => { heroShift = !heroShift; updateAllKeys(); });
     });
     kbBase.querySelectorAll('.hero-caps-btn').forEach(btn => {
-      btn.addEventListener('click', () => { heroCaps = !heroCaps; heroShift = false; updateAllKeys(); });
+      btn.addEventListener('click', () => { heroCaps = !heroCaps; updateAllKeys(); });
     });
   }
   if (kb3d) {
     const capsKey = kb3d.querySelector('[data-key="CapsLock"]');
-    if (capsKey) capsKey.addEventListener('click', () => { heroCaps = !heroCaps; heroShift = false; updateAllKeys(); });
+    if (capsKey) capsKey.addEventListener('click', () => { heroCaps = !heroCaps; updateAllKeys(); });
     const shiftKeys = kb3d.querySelectorAll('[data-key="ShiftLeft"],[data-key="ShiftRight"]');
     shiftKeys.forEach(btn => btn.addEventListener('click', () => { heroShift = !heroShift; updateAllKeys(); }));
   }

@@ -1,4 +1,4 @@
-import SwiftUI
+import AppKit
 
 class KeyboardState: ObservableObject {
     static let shared = KeyboardState()
@@ -6,6 +6,10 @@ class KeyboardState: ObservableObject {
     @Published var isCaps: Bool = false
 
     private init() {
+        let flags = NSEvent.modifierFlags
+        isShifted = flags.contains(.shift)
+        isCaps = flags.contains(.capsLock)
+
         NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             DispatchQueue.main.async {
                 self?.isShifted = event.modifierFlags.contains(.shift)

@@ -486,4 +486,3 @@ struct CollapsedKeyPicker: View {
         }
     }
 }
-

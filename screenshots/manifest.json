@@ -1,0 +1,16 @@
+{
+  "name": "KeyLoom",
+  "short_name": "KeyLoom",
+  "description": "A floating virtual keyboard for macOS. Type into any app with automatic Cmd+V paste.",
+  "start_url": "https://keyloom.app/",
+  "display": "standalone",
+  "background_color": "#0d0d15",
+  "theme_color": "#0d0d15",
+  "icons": [
+    {
+      "src": "final/icon_256x256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ]
+}

@@ -124,6 +124,54 @@ All customization is available through the Settings panel (gear icon in the head
 - **Clipboard**: Auto-monitor toggle, max history (100-1000), clear
 - **Sounds**: On/off, volume, 6 sound styles with preview
 
+## Troubleshooting
+
+### "KeyLoom is damaged and can't be opened"
+
+This happens when macOS Gatekeeper blocks unsigned apps downloaded from the internet. The app needs to be signed with a Developer ID certificate and notarized by Apple.
+
+**Quick fix (for users):**
+```bash
+xattr -cr /Applications/KeyLoom.app
+```
+Then open KeyLoom normally.
+
+**Permanent fix (for developers):**
+Requires an [Apple Developer Program](https://developer.apple.com/programs/) membership ($99/year). Once enrolled:
+
+1. Generate an app-specific password at [appleid.apple.com](https://appleid.apple.com) under "Sign-In and Security"
+2. Add these GitHub secrets to your repository (Settings > Secrets and variables > Actions):
+
+| Secret | How to get it |
+|--------|---------------|
+| `APPLE_CERTIFICATE` | Export your "Developer ID Application" certificate as `.p12`, then `base64 -i cert.p12` |
+| `APPLE_CERTIFICATE_PWD` | Password you set when exporting the `.p12` |
+| `APPLE_TEAM_ID` | Found at [developer.apple.com/account](https://developer.apple.com/account) under Membership Details |
+| `APPLE_ID` | Your Apple ID email |
+| `AC_PASSWORD` | App-specific password from appleid.apple.com |
+
+3. Push a tag to trigger the release workflow:
+```bash
+fastlane bump version:1.2.0
+git push origin main --tags
+```
+
+The workflow will automatically sign, notarize, staple, and publish a trusted DMG.
+
+### Accessibility permission denied
+
+KeyLoom needs Accessibility permission to paste into other apps via Cmd+V simulation. Grant it in:
+
+> System Settings > Privacy & Security > Accessibility > KeyLoom
+
+If KeyLoom doesn't appear in the list, toggle the switch off and on, or restart KeyLoom.
+
+### Keyboard doesn't appear
+
+1. Check the menu bar for the KeyLoom icon (keyboard symbol)
+2. Click it to toggle the keyboard visibility
+3. If the icon is missing, check System Settings > Control Center > Menu Bar Only
+
 ## License
 
 MIT - see [LICENSE](LICENSE)

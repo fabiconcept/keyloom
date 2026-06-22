@@ -67,6 +67,12 @@ struct SettingsView: View {
                 settingRow("Font Size", icon: "textformat.size", value: settings.fontSize, range: 10...18, step: 1, tip: "Size of key label text") {
                     settings.fontSize = $0
                 }
+                settingRow("Horizontal Padding", icon: "arrow.left.arrow.right", value: settings.keyboardPaddingHorizontal, range: 4...32, step: 2, tip: "Left and right padding inside the keyboard panel") {
+                    settings.keyboardPaddingHorizontal = $0
+                }
+                settingRow("Vertical Padding", icon: "arrow.up.arrow.down", value: settings.keyboardPaddingVertical, range: 4...32, step: 2, tip: "Top and bottom padding inside the keyboard panel") {
+                    settings.keyboardPaddingVertical = $0
+                }
             }
         }
         .formStyle(.grouped)

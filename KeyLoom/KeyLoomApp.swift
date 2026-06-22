@@ -67,28 +67,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem?.button {
             button.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "KeyLoom")
-            button.action = #selector(togglePanel)
-            button.target = self
 
             let menu = NSMenu()
-            menu.addItem(NSMenuItem(title: "Show Keyboard", action: #selector(togglePanel), keyEquivalent: ""))
-            menu.addItem(NSMenuItem(title: "Show Tips", action: #selector(showTips), keyEquivalent: ""))
-            menu.addItem(NSMenuItem(title: "Check Accessibility Access", action: #selector(checkAccessibility), keyEquivalent: ""))
-            menu.addItem(NSMenuItem(title: "About KeyLoom", action: #selector(showAbout), keyEquivalent: ""))
-            menu.addItem(NSMenuItem.separator())
-            menu.addItem(NSMenuItem(title: "Force Quit", action: #selector(forceQuit), keyEquivalent: ""))
+            menu.addItem(NSMenuItem(title: "Open Keyboard", action: #selector(togglePanel), keyEquivalent: ""))
+            menu.addItem(NSMenuItem(title: "Settings", action: #selector(openSettingsFromMenu), keyEquivalent: ","))
+            menu.addItem(NSMenuItem(title: "Guide", action: #selector(showGuide), keyEquivalent: ""))
             menu.addItem(NSMenuItem.separator())
             menu.addItem(NSMenuItem(title: "Quit KeyLoom", action: #selector(quitApp), keyEquivalent: "q"))
             button.menu = menu
         }
     }
 
-    @objc func showTips() {
-        showHelp()
+    @objc func openSettingsFromMenu() {
+        openSettings()
     }
 
-    @objc func checkAccessibility() {
-        checkAccessibilityPermission()
+    @objc func showGuide() {
+        showHelp()
     }
 
     @objc func showAbout() {

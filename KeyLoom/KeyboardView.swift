@@ -56,8 +56,8 @@ struct KeyboardView: View {
             VStack(spacing: 10) {
                 fullKeyboard
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 16)
+            .padding(.horizontal, settings.keyboardPaddingHorizontal)
+            .padding(.bottom, settings.keyboardPaddingVertical)
         }
         .background(
             RoundedRectangle(cornerRadius: settings.panelCornerRadius, style: .continuous)

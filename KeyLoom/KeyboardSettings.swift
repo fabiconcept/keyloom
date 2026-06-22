@@ -104,6 +104,12 @@ class KeyboardSettings: ObservableObject {
     @Published var panelBorderOpacity: Double = 1.0 {
         didSet { UserDefaults.standard.set(panelBorderOpacity, forKey: "panelBorderOpacity") }
     }
+    @Published var keyboardPaddingHorizontal: CGFloat = 16 {
+        didSet { UserDefaults.standard.set(keyboardPaddingHorizontal, forKey: "keyboardPaddingHorizontal") }
+    }
+    @Published var keyboardPaddingVertical: CGFloat = 16 {
+        didSet { UserDefaults.standard.set(keyboardPaddingVertical, forKey: "keyboardPaddingVertical") }
+    }
 
     static let defaults: [String: Any] = [
         "keySize": 30,
@@ -129,7 +135,9 @@ class KeyboardSettings: ObservableObject {
         "showPanelBorder": false,
         "panelBorderWidth": 1,
         "panelBorderColor": "white",
-        "panelBorderOpacity": 1.0
+        "panelBorderOpacity": 1.0,
+        "keyboardPaddingHorizontal": 16,
+        "keyboardPaddingVertical": 16
     ]
 
     private init() {
@@ -162,6 +170,8 @@ class KeyboardSettings: ObservableObject {
         self.panelBorderWidth = d.object(forKey: "panelBorderWidth") as? CGFloat ?? 1
         self.panelBorderColor = d.string(forKey: "panelBorderColor") ?? "white"
         self.panelBorderOpacity = d.object(forKey: "panelBorderOpacity") as? Double ?? 1.0
+        self.keyboardPaddingHorizontal = d.object(forKey: "keyboardPaddingHorizontal") as? CGFloat ?? 16
+        self.keyboardPaddingVertical = d.object(forKey: "keyboardPaddingVertical") as? CGFloat ?? 16
         let savedStyle = d.string(forKey: "soundStyle") ?? SoundManager.SoundStyle.keyClick.rawValue
         if SoundManager.SoundStyle(rawValue: savedStyle) != nil {
             self.soundStyle = savedStyle

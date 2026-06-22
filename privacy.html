@@ -4,6 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Privacy Policy - KeyLoom</title>
+  <meta name="description" content="KeyLoom's privacy policy. Learn how KeyLoom handles your data, clipboard contents, and system permissions on macOS.">
+  <meta name="keywords" content="KeyLoom, privacy policy, macOS, virtual keyboard, data handling">
+  <meta name="author" content="Fabiconcept">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://keyloom.app/privacy.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Privacy Policy - KeyLoom">
+  <meta property="og:description" content="KeyLoom's privacy policy. Learn how KeyLoom handles your data, clipboard contents, and system permissions on macOS.">
+  <meta property="og:image" content="https://keyloom.app/screenshots/final/hero.png">
+  <meta property="og:url" content="https://keyloom.app/privacy.html">
+  <meta property="og:site_name" content="KeyLoom">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Privacy Policy - KeyLoom">
+  <meta name="twitter:description" content="KeyLoom's privacy policy. Learn how KeyLoom handles your data, clipboard contents, and system permissions on macOS.">
+  <meta name="twitter:image" content="https://keyloom.app/screenshots/final/hero.png">
+  <meta name="twitter:creator" content="@fabiconcept">
+  <meta name="twitter:site" content="@fabiconcept">
+  <meta name="theme-color" content="#0d0d15">
+  <link rel="icon" type="image/png" href="final/icon_256x256.png">
+  <link rel="apple-touch-icon" href="final/icon_256x256.png">
+  <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@400;700&family=Elms+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -272,6 +294,18 @@
     .stagger-2 { transition-delay: 0.1s; }
     .stagger-3 { transition-delay: 0.15s; }
     .stagger-4 { transition-delay: 0.2s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .reveal, .reveal-up {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -284,7 +318,7 @@
       <circle id="floating-anchor-outer" class="floating-hero-anchor-outer" r="7" fill="#333" stroke="#555" stroke-width="2"/>
       <circle id="floating-anchor-inner" class="floating-hero-anchor-inner" r="3" fill="#B4B2A9"/>
     </svg>
-    <img src="final/hero.png" alt="" class="floating-hero-img" id="floating-hero-img">
+    <img src="final/hero.png" alt="KeyLoom floating virtual keyboard on macOS" class="floating-hero-img" id="floating-hero-img" width="280" height="200">
   </div>
 
   <nav class="nav">
@@ -333,7 +367,7 @@
     <p class="reveal stagger-4">If you have any questions about this Privacy Policy, please contact us:</p>
     <ul class="reveal stagger-4">
       <li>By email: <a href="mailto:favourajokubi@gmail.com">favourajokubi@gmail.com</a></li>
-      <li>By GitHub: <a href="https://github.com/fabiconcept" target="_blank">github.com/fabiconcept</a></li>
+      <li>By GitHub: <a href="https://github.com/fabiconcept" target="_blank" rel="noopener">github.com/fabiconcept</a></li>
     </ul>
 
     <div class="divider reveal"></div>

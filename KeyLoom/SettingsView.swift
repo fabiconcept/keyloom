@@ -487,27 +487,3 @@ struct CollapsedKeyPicker: View {
     }
 }
 
-func openSettings() {
-    if let existing = settingsWindow {
-        existing.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
-        return
-    }
-
-    let settingsView = SettingsView()
-    let hostingView = NSHostingView(rootView: settingsView)
-
-    let window = NSPanel(
-        contentRect: NSRect(x: 0, y: 0, width: 560, height: 480),
-        styleMask: [.titled, .closable, .nonactivatingPanel],
-        backing: .buffered,
-        defer: false
-    )
-    window.contentView = hostingView
-    window.title = "KeyLoom Settings"
-    window.level = .floating
-    window.center()
-    window.makeKeyAndOrderFront(nil)
-    NSApp.activate(ignoringOtherApps: true)
-    settingsWindow = window
-}

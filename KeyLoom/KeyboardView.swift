@@ -83,15 +83,6 @@ struct KeyboardView: View {
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(.secondary)
             Spacer()
-            Button(action: { showHelp() }) {
-                Image(systemName: "questionmark.circle")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.secondary)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .focusable(false)
-            .help("Open help guide")
             Button(action: { openCollapsedPanel() }) {
                 Image(systemName: "rectangle.compress.vertical")
                     .font(.system(size: 11, weight: .medium))
@@ -115,15 +106,6 @@ struct KeyboardView: View {
             .buttonStyle(.plain)
             .focusable(false)
             .help("Open clipboard history")
-            Button(action: { openSettings() }) {
-                Image(systemName: "gearshape")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.secondary)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .focusable(false)
-            .help("Open settings")
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)

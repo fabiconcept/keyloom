@@ -63,8 +63,16 @@ struct KeyboardView: View {
             RoundedRectangle(cornerRadius: settings.panelCornerRadius, style: .continuous)
                 .fill(.ultraThinMaterial)
         )
+        .overlay(
+            settings.showPanelBorder ?
+                RoundedRectangle(cornerRadius: settings.panelCornerRadius, style: .continuous)
+                    .stroke(settings.resolvedBorderColor, lineWidth: settings.panelBorderWidth)
+                : nil
+        )
         .shadow(color: .black.opacity(0.35), radius: 24, x: 0, y: 8)
     }
+
+    @State private var isHoveringCollapse = false
 
     var pillHandle: some View {
         HStack {
@@ -87,11 +95,16 @@ struct KeyboardView: View {
             Button(action: { openCollapsedPanel() }) {
                 Image(systemName: "rectangle.compress.vertical")
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(isHoveringCollapse ? .indigo : .secondary)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .focusable(false)
+            .onHover { hovering in
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    isHoveringCollapse = hovering
+                }
+            }
             .help("Open quick keys panel")
             Button(action: { openClipboard() }) {
                 Image(systemName: "clipboard")
@@ -101,7 +114,7 @@ struct KeyboardView: View {
             }
             .buttonStyle(.plain)
             .focusable(false)
-            .help("Open clipboard history (\(ClipboardManager.shared.items.count))")
+            .help("Open clipboard history")
             Button(action: { openSettings() }) {
                 Image(systemName: "gearshape")
                     .font(.system(size: 12, weight: .medium))

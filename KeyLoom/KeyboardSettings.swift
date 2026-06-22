@@ -92,6 +92,18 @@ class KeyboardSettings: ObservableObject {
     @Published var soundVolume: Float = 0.5 {
         didSet { UserDefaults.standard.set(soundVolume, forKey: "soundVolume") }
     }
+    @Published var showPanelBorder: Bool = false {
+        didSet { UserDefaults.standard.set(showPanelBorder, forKey: "showPanelBorder") }
+    }
+    @Published var panelBorderWidth: CGFloat = 1 {
+        didSet { UserDefaults.standard.set(panelBorderWidth, forKey: "panelBorderWidth") }
+    }
+    @Published var panelBorderColor: String = "white" {
+        didSet { UserDefaults.standard.set(panelBorderColor, forKey: "panelBorderColor") }
+    }
+    @Published var panelBorderOpacity: Double = 1.0 {
+        didSet { UserDefaults.standard.set(panelBorderOpacity, forKey: "panelBorderOpacity") }
+    }
 
     static let defaults: [String: Any] = [
         "keySize": 30,
@@ -113,7 +125,11 @@ class KeyboardSettings: ObservableObject {
         "collapsedKeyCount": 5,
         "fontSize": 13,
         "startMode": "expanded",
-        "launchAtLogin": false
+        "launchAtLogin": false,
+        "showPanelBorder": false,
+        "panelBorderWidth": 1,
+        "panelBorderColor": "white",
+        "panelBorderOpacity": 1.0
     ]
 
     private init() {
@@ -142,6 +158,10 @@ class KeyboardSettings: ObservableObject {
         self.clipboardMaxItems = d.object(forKey: "clipboardMaxItems") as? Int ?? 500
         self.clipboardMonitorEnabled = d.object(forKey: "clipboardMonitorEnabled") as? Bool ?? true
         self.soundVolume = d.object(forKey: "soundVolume") as? Float ?? 0.5
+        self.showPanelBorder = d.object(forKey: "showPanelBorder") as? Bool ?? false
+        self.panelBorderWidth = d.object(forKey: "panelBorderWidth") as? CGFloat ?? 1
+        self.panelBorderColor = d.string(forKey: "panelBorderColor") ?? "white"
+        self.panelBorderOpacity = d.object(forKey: "panelBorderOpacity") as? Double ?? 1.0
         let savedStyle = d.string(forKey: "soundStyle") ?? SoundManager.SoundStyle.keyClick.rawValue
         if SoundManager.SoundStyle(rawValue: savedStyle) != nil {
             self.soundStyle = savedStyle
@@ -187,6 +207,30 @@ class KeyboardSettings: ObservableObject {
         soundEnabled = true
         soundStyle = SoundManager.SoundStyle.keyClick.rawValue
         soundVolume = 0.5
+        showPanelBorder = false
+        panelBorderWidth = 1
+        panelBorderColor = "white"
+        panelBorderOpacity = 1.0
+    }
+
+    var resolvedBorderColor: Color {
+        let base: Color
+        switch panelBorderColor {
+        case "white": base = .white
+        case "black": base = .black
+        case "gray": base = .gray
+        case "indigo": base = .indigo
+        case "blue": base = .blue
+        case "purple": base = .purple
+        case "pink": base = .pink
+        case "red": base = .red
+        case "orange": base = .orange
+        case "yellow": base = .yellow
+        case "green": base = .green
+        case "cyan": base = .cyan
+        default: base = .white
+        }
+        return base.opacity(panelBorderOpacity)
     }
 
     private func updateLoginItem() {

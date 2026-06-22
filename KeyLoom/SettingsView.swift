@@ -46,6 +46,7 @@ struct SettingsView: View {
             .padding(.vertical, 10)
         }
         .frame(width: 560, height: 480)
+        .background(.background)
     }
 
     var layoutTab: some View {
@@ -77,6 +78,51 @@ struct SettingsView: View {
             Section(header: Text("Panel"), footer: Text("Controls the outer container shape.")) {
                 settingRow("Panel Radius", icon: "rectangle.roundedtop", value: settings.panelCornerRadius, range: 12...32, step: 2, tip: "Corner radius of the floating panel") {
                     settings.panelCornerRadius = $0
+                }
+                Toggle(isOn: $settings.showPanelBorder) {
+                    Label("Panel Border", systemImage: "rectangle.dashed")
+                }
+                .help("Draw a border around the keyboard panel")
+                if settings.showPanelBorder {
+                    HStack {
+                        Label("Border Width", systemImage: "arrow.left.and.right")
+                        Spacer()
+                        Slider(value: $settings.panelBorderWidth, in: 1...4, step: 0.5)
+                            .frame(width: 150)
+                        Text("\(Int(settings.panelBorderWidth))pt")
+                            .monospacedDigit()
+                            .frame(width: 40)
+                    }
+                    .help("Thickness of the panel border")
+                    HStack {
+                        Label("Border Color", systemImage: "paintpalette")
+                        Spacer()
+                        Picker("", selection: $settings.panelBorderColor) {
+                            Text("White").tag("white")
+                            Text("Black").tag("black")
+                            Text("Gray").tag("gray")
+                            Text("Indigo").tag("indigo")
+                            Text("Blue").tag("blue")
+                            Text("Purple").tag("purple")
+                            Text("Pink").tag("pink")
+                            Text("Red").tag("red")
+                            Text("Orange").tag("orange")
+                            Text("Yellow").tag("yellow")
+                            Text("Green").tag("green")
+                            Text("Cyan").tag("cyan")
+                        }
+                        .frame(width: 100)
+                    }
+                    HStack {
+                        Label("Border Opacity", systemImage: "circle.lefthalf.filled")
+                        Spacer()
+                        Slider(value: $settings.panelBorderOpacity, in: 0.1...1.0, step: 0.05)
+                            .frame(width: 150)
+                        Text("\(Int(settings.panelBorderOpacity * 100))%")
+                            .monospacedDigit()
+                            .frame(width: 40)
+                    }
+                    .help("Transparency of the panel border")
                 }
             }
             Section(header: Text("Keys"), footer: Text("Font affects all key labels.")) {

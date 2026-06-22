@@ -142,7 +142,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         panel.isMovableByWindowBackground = true
         panel.backgroundColor = .clear
         panel.isOpaque = false
-        panel.hasShadow = true
+        panel.hasShadow = false
+        panel.contentView?.wantsLayer = true
+        panel.contentView?.layer?.borderWidth = 0
+        panel.contentView?.layer?.borderColor = NSColor.clear.cgColor
 
         let hostingView = NSHostingView(rootView: KeyboardView())
         panel.contentView = hostingView

@@ -2,13 +2,23 @@ import SwiftUI
 
 var collapsedWindow: NSWindow?
 var mainWindow: NSWindow?
+private var hoverMonitor: Any?
+private var hoverWorkItem: DispatchWorkItem?
+private var hoverExitWorkItem: DispatchWorkItem?
+
+class CollapsedHoverState: ObservableObject {
+    static let shared = CollapsedHoverState()
+    @Published var isHovering = false
+}
 
 struct CollapsedKeyboardView: View {
     @ObservedObject private var settings = KeyboardSettings.shared
     @ObservedObject private var keyboardState = KeyboardState.shared
     @ObservedObject private var usageTracker = KeyUsageTracker.shared
+    @ObservedObject private var hoverState = CollapsedHoverState.shared
 
     private let sender = KeystrokeSender.shared
+    @State private var expandPulse = false
 
     var brokenKeyColor: Color {
         switch settings.brokenKeyColor {
@@ -43,26 +53,9 @@ struct CollapsedKeyboardView: View {
         }
     }
 
-    func keyFont(size: CGFloat) -> Font {
-        if let name = customFontName {
-            return .custom(name, size: size)
-        }
-        return .system(size: size, weight: .medium, design: resolvedFont)
-    }
-
-    @State private var isHovering = false
-    @State private var hoverWorkItem: DispatchWorkItem?
-    @State private var mouseLocation: NSPoint?
-
     var body: some View {
+        let isHovering = hoverState.isHovering
         VStack(spacing: 0) {
-            Color.clear
-                .frame(width: 0, height: 0)
-                .focusable(false)
-            if isHovering {
-                pillHandle
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-            }
             HStack(spacing: settings.keySpacing) {
                 ForEach(collapsedKeys, id: \.self) { keyLabel in
                     let key = findKey(for: keyLabel)
@@ -87,7 +80,7 @@ struct CollapsedKeyboardView: View {
                         action: { handleKey(k) }
                     )
                 }
-                Button(action: { openClipboard() }) {
+                Button(action: { isHovering ? closeCollapsedPanel() : openClipboard() }) {
                     ZStack {
                         if settings.neomorphismEnabled {
                             RoundedRectangle(cornerRadius: settings.keyCornerRadius, style: .continuous)
@@ -103,9 +96,10 @@ struct CollapsedKeyboardView: View {
                                     )
                                 )
                         }
-                        Image(systemName: "clipboard")
-                            .font(.system(size: settings.fontSize - 2, weight: .medium))
-                            .foregroundColor(.secondary)
+                        Image(systemName: isHovering ? "rectangle.expand.vertical" : "clipboard")
+                            .font(.system(size: settings.fontSize - 2, weight: isHovering ? .semibold : .medium))
+                            .foregroundColor(isHovering ? .indigo : .secondary)
+                            .scaleEffect(isHovering && expandPulse ? 1.2 : 1.0)
                     }
                     .frame(width: settings.keySize, height: settings.keySize)
                     .background(
@@ -129,84 +123,40 @@ struct CollapsedKeyboardView: View {
                     )
                     .shadow(color: settings.showKeyShadow ? .black.opacity(0.45 * settings.neomorphismIntensity) : .clear, radius: 5, x: 0, y: 3)
                     .shadow(color: settings.showKeyShadow && settings.neomorphismEnabled ? .white.opacity(0.35 * settings.neomorphismIntensity) : .clear, radius: 3, x: 0, y: -2)
+                    .shadow(color: isHovering ? .indigo.opacity(0.5) : .clear, radius: isHovering && expandPulse ? 8 : 4, x: 0, y: 0)
                 }
                 .buttonStyle(.plain)
-                .help("Open clipboard history")
+                .help(isHovering ? "Expand to full keyboard" : "Open clipboard history")
+                .onChange(of: isHovering) { hovering in
+                    if hovering {
+                        expandPulse = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                expandPulse = false
+                            }
+                        }
+                    }
+                }
             }
-            .padding(.horizontal, isHovering ? 0 : 8)
+            .padding(.horizontal, 8)
             .padding(.bottom, 8)
-            .padding(.top, isHovering ? 0 : 8)
-        }
-        .onHover { hovering in
-            if hovering {
-                let currentMouse = NSEvent.mouseLocation
-                if let lastMouse = mouseLocation {
-                    let distance = hypot(currentMouse.x - lastMouse.x, currentMouse.y - lastMouse.y)
-                    if distance > 5 {
-                        mouseLocation = currentMouse
-                        return
-                    }
-                }
-                mouseLocation = currentMouse
-                guard hoverWorkItem == nil else { return }
-                let workItem = DispatchWorkItem { [self] in
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isHovering = true
-                    }
-                }
-                hoverWorkItem = workItem
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: workItem)
-            } else {
-                hoverWorkItem?.cancel()
-                hoverWorkItem = nil
-                mouseLocation = nil
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isHovering = false
-                }
-            }
+            .padding(.top, 8)
         }
         .background(
             RoundedRectangle(cornerRadius: settings.panelCornerRadius, style: .continuous)
                 .fill(.ultraThinMaterial)
+        )
+        .overlay(
+            settings.showPanelBorder ?
+                RoundedRectangle(cornerRadius: settings.panelCornerRadius, style: .continuous)
+                    .stroke(settings.resolvedBorderColor, lineWidth: settings.panelBorderWidth)
+                : nil
         )
         .shadow(color: .black.opacity(0.35), radius: 24, x: 0, y: 8)
     }
 
     var collapsedKeys: [String] {
         settings.effectiveCollapsedKeys()
-    }
-
-    var pillHandle: some View {
-        HStack {
-            Image(systemName: "bolt.fill")
-                .font(.system(size: 10, weight: .medium))
-                .foregroundColor(.secondary)
-            Text("Quick Keys")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(.secondary)
-            Spacer()
-            Button(action: { closeCollapsedPanel() }) {
-                Image(systemName: "rectangle.expand.vertical")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.secondary)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .focusable(false)
-            .help("Expand to full keyboard")
-            Button(action: { closeCollapsedPanel() }) {
-                Image(systemName: "xmark.circle")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.secondary)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .focusable(false)
-            .help("Close quick keys")
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .contentShape(Rectangle())
     }
 
     func findKey(for label: String) -> Key? {
@@ -219,11 +169,6 @@ struct CollapsedKeyboardView: View {
     }
 
     func handleKey(_ key: Key) {
-        hoverWorkItem?.cancel()
-        hoverWorkItem = nil
-        withAnimation(.easeInOut(duration: 0.15)) {
-            isHovering = false
-        }
         usageTracker.recordUse(key.label)
         SoundManager.shared.playKeyPress(keyLabel: key.label)
         switch key.type {
@@ -272,7 +217,10 @@ func openCollapsedPanel() {
     panel.isMovableByWindowBackground = true
     panel.backgroundColor = .clear
     panel.isOpaque = false
-    panel.hasShadow = true
+    panel.hasShadow = false
+    panel.contentView?.wantsLayer = true
+    panel.contentView?.layer?.borderWidth = 0
+    panel.contentView?.layer?.borderColor = NSColor.clear.cgColor
 
     let hostingView = NSHostingView(rootView: CollapsedKeyboardView())
     panel.contentView = hostingView
@@ -299,10 +247,71 @@ func openCollapsedPanel() {
     panel.orderFront(nil)
     collapsedWindow = panel
     mainWindow?.orderOut(nil)
+
+    startHoverMonitor(for: panel)
 }
 
 func closeCollapsedPanel() {
+    stopHoverMonitor()
+    CollapsedHoverState.shared.isHovering = false
     collapsedWindow?.orderOut(nil)
     collapsedWindow = nil
     mainWindow?.orderFront(nil)
+}
+
+// MARK: - Hover Monitor
+
+private func startHoverMonitor(for panel: NSPanel) {
+    stopHoverMonitor()
+
+    hoverMonitor = NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved, .leftMouseDown]) { event in
+        let mouseLocation = NSEvent.mouseLocation
+        let panelFrame = panel.frame
+
+        let isInside = panelFrame.contains(mouseLocation)
+
+        if isInside && !CollapsedHoverState.shared.isHovering {
+            hoverExitWorkItem?.cancel()
+            hoverExitWorkItem = nil
+            guard hoverWorkItem == nil else { return event }
+            let workItem = DispatchWorkItem {
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        CollapsedHoverState.shared.isHovering = true
+                    }
+                }
+            }
+            hoverWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: workItem)
+        } else if !isInside && CollapsedHoverState.shared.isHovering {
+            hoverWorkItem?.cancel()
+            hoverWorkItem = nil
+            guard hoverExitWorkItem == nil else { return event }
+            let exitWorkItem = DispatchWorkItem {
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        CollapsedHoverState.shared.isHovering = false
+                    }
+                }
+            }
+            hoverExitWorkItem = exitWorkItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: exitWorkItem)
+        } else if !isInside {
+            hoverWorkItem?.cancel()
+            hoverWorkItem = nil
+        }
+
+        return event
+    }
+}
+
+private func stopHoverMonitor() {
+    if let monitor = hoverMonitor {
+        NSEvent.removeMonitor(monitor)
+        hoverMonitor = nil
+    }
+    hoverWorkItem?.cancel()
+    hoverWorkItem = nil
+    hoverExitWorkItem?.cancel()
+    hoverExitWorkItem = nil
 }

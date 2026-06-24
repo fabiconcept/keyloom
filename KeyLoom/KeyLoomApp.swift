@@ -65,17 +65,40 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func setupStatusBar() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "KeyLoom")
+        guard let button = statusItem?.button else { return }
 
-            let menu = NSMenu()
-            menu.addItem(NSMenuItem(title: "Open Keyboard", action: #selector(togglePanel), keyEquivalent: ""))
-            menu.addItem(NSMenuItem(title: "Settings", action: #selector(openSettingsFromMenu), keyEquivalent: ","))
-            menu.addItem(NSMenuItem(title: "Guide", action: #selector(showGuide), keyEquivalent: ""))
-            menu.addItem(NSMenuItem.separator())
-            menu.addItem(NSMenuItem(title: "Quit KeyLoom", action: #selector(quitApp), keyEquivalent: "q"))
-            button.menu = menu
+        if let img = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "KeyLoom") {
+            img.isTemplate = true
+            button.image = img
+        } else {
+            button.title = "⌨"
         }
+
+        let menu = NSMenu()
+
+        let openItem = NSMenuItem(title: "Open Keyboard", action: #selector(togglePanel), keyEquivalent: "")
+        openItem.target = self
+        menu.addItem(openItem)
+
+        let settingsItem = NSMenuItem(title: "Settings", action: #selector(openSettingsFromMenu), keyEquivalent: ",")
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+
+        let guideItem = NSMenuItem(title: "Guide", action: #selector(showGuide), keyEquivalent: "")
+        guideItem.target = self
+        menu.addItem(guideItem)
+
+        let aboutItem = NSMenuItem(title: "About KeyLoom", action: #selector(showAbout), keyEquivalent: "")
+        aboutItem.target = self
+        menu.addItem(aboutItem)
+
+        menu.addItem(NSMenuItem.separator())
+
+        let quitItem = NSMenuItem(title: "Quit KeyLoom", action: #selector(quitApp), keyEquivalent: "q")
+        quitItem.target = self
+        menu.addItem(quitItem)
+
+        statusItem?.menu = menu
     }
 
     @objc func openSettingsFromMenu() {

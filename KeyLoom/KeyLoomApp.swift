@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import Combine
 
 // MARK: - App
 @main
@@ -14,6 +15,7 @@ struct KeyLoomApp: App {
 class AppDelegate: NSObject, NSApplicationDelegate {
     var floatingWindow: NSWindow?
     var statusItem: NSStatusItem?
+    private var cancellables = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -37,12 +39,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func checkAccessibilityPermission() {
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
-        let trusted = AXIsProcessTrustedWithOptions(options)
+        let trusted = AXIsProcessTrusted()
         if !trusted {
-            // Trigger an accessibility API call to make the app appear in System Settings
-            let _ = AXUIElementCreateSystemWide()
-            
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 let alert = NSAlert()
                 alert.messageText = "Accessibility Access Required"
@@ -149,8 +147,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func showFloatingPanel() {
+        let settings = KeyboardSettings.shared
+        let panelWidth = settings.keyboardWidth + settings.keyboardPaddingHorizontal * 2
+        let panelHeight = Self.calculatePanelHeight(settings: settings)
+
         let panel = FloatingPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 524, height: 260),
+            contentRect: NSRect(x: 0, y: 0, width: panelWidth, height: panelHeight),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -176,8 +178,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             panel.setFrameOrigin(NSPoint(x: x, y: y))
         } else if let screen = NSScreen.main {
             let screenFrame = screen.visibleFrame
-            let x = screenFrame.midX - 262
-            let y = screenFrame.maxY - 280
+            let x = screenFrame.midX - panelWidth / 2
+            let y = screenFrame.maxY - panelHeight - 20
             panel.setFrameOrigin(NSPoint(x: x, y: y))
         }
 
@@ -191,9 +193,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             UserDefaults.standard.set(["x": origin.x, "y": origin.y], forKey: "expandedPanelFrame")
         }
 
+        // Resize panel when layout settings change
+        settings.objectWillChange.sink { [weak panel] _ in
+            guard let panel = panel else { return }
+            DispatchQueue.main.async {
+                let s = KeyboardSettings.shared
+                let w = s.keyboardWidth + s.keyboardPaddingHorizontal * 2
+                let h = Self.calculatePanelHeight(settings: s)
+                var frame = panel.frame
+                frame.size = NSSize(width: w, height: h)
+                panel.setFrame(frame, display: true, animate: false)
+            }
+        }.store(in: &cancellables)
+
         panel.orderFront(nil)
         floatingWindow = panel
         mainWindow = panel
+    }
+
+    static func calculatePanelHeight(settings: KeyboardSettings) -> CGFloat {
+        let pillHandleHeight: CGFloat = 34
+        let visibleRows = settings.showDecorativeKeys ? 5 : 4
+        let keyboardContentHeight = CGFloat(visibleRows) * settings.keySize + CGFloat(visibleRows - 1) * settings.keySpacing
+        return pillHandleHeight + keyboardContentHeight + settings.keyboardPaddingVertical
     }
 }
 

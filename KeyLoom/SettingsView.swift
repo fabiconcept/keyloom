@@ -52,27 +52,13 @@ struct SettingsView: View {
     var layoutTab: some View {
         Form {
             Section(header: Text("Dimensions"), footer: Text("Keyboard width auto-adjusts the overall panel size.")) {
-                settingRow("Key Height", icon: "rectangle", value: settings.keySize, range: 24...40, step: 2, tip: "Height of each key in points") {
-                    settings.keySize = $0
-                }
-                settingRow("Keyboard Width", icon: "arrow.left.and.right", value: settings.keyboardWidth, range: 400...600, step: 10, tip: "Total width of the keyboard") {
-                    settings.keyboardWidth = $0
-                }
-                settingRow("Key Spacing", icon: "arrow.up.arrow.down", value: settings.keySpacing, range: 2...8, step: 1, tip: "Gap between adjacent keys") {
-                    settings.keySpacing = $0
-                }
-                settingRow("Corner Radius", icon: "rectangle.roundedtop", value: settings.keyCornerRadius, range: 0...12, step: 1, tip: "Roundness of key corners") {
-                    settings.keyCornerRadius = $0
-                }
-                settingRow("Font Size", icon: "textformat.size", value: settings.fontSize, range: 10...18, step: 1, tip: "Size of key label text") {
-                    settings.fontSize = $0
-                }
-                settingRow("Horizontal Padding", icon: "arrow.left.arrow.right", value: settings.keyboardPaddingHorizontal, range: 4...32, step: 2, tip: "Left and right padding inside the keyboard panel") {
-                    settings.keyboardPaddingHorizontal = $0
-                }
-                settingRow("Vertical Padding", icon: "arrow.up.arrow.down", value: settings.keyboardPaddingVertical, range: 4...32, step: 2, tip: "Top and bottom padding inside the keyboard panel") {
-                    settings.keyboardPaddingVertical = $0
-                }
+                settingRow("Key Height", icon: "rectangle", value: $settings.keySize, range: 24...40, step: 2, tip: "Height of each key in points")
+                settingRow("Keyboard Width", icon: "arrow.left.and.right", value: $settings.keyboardWidth, range: 400...600, step: 10, tip: "Total width of the keyboard")
+                settingRow("Key Spacing", icon: "arrow.up.arrow.down", value: $settings.keySpacing, range: 2...8, step: 1, tip: "Gap between adjacent keys")
+                settingRow("Corner Radius", icon: "rectangle.roundedtop", value: $settings.keyCornerRadius, range: 0...12, step: 1, tip: "Roundness of key corners")
+                settingRow("Font Size", icon: "textformat.size", value: $settings.fontSize, range: 10...18, step: 1, tip: "Size of key label text")
+                settingRow("Horizontal Padding", icon: "arrow.left.arrow.right", value: $settings.keyboardPaddingHorizontal, range: 4...32, step: 2, tip: "Left and right padding inside the keyboard panel")
+                settingRow("Vertical Padding", icon: "arrow.up.arrow.down", value: $settings.keyboardPaddingVertical, range: 4...32, step: 2, tip: "Top and bottom padding inside the keyboard panel")
             }
         }
         .formStyle(.grouped)
@@ -82,9 +68,7 @@ struct SettingsView: View {
     var appearanceTab: some View {
         Form {
             Section(header: Text("Panel"), footer: Text("Controls the outer container shape.")) {
-                settingRow("Panel Radius", icon: "rectangle.roundedtop", value: settings.panelCornerRadius, range: 12...32, step: 2, tip: "Corner radius of the floating panel") {
-                    settings.panelCornerRadius = $0
-                }
+                settingRow("Panel Radius", icon: "rectangle.roundedtop", value: $settings.panelCornerRadius, range: 12...32, step: 2, tip: "Corner radius of the floating panel")
                 Toggle(isOn: $settings.showPanelBorder) {
                     Label("Panel Border", systemImage: "rectangle.dashed")
                 }
@@ -404,17 +388,14 @@ struct SettingsView: View {
         settings.brokenKeys = Set(keys)
     }
 
-    func settingRow(_ label: String, icon: String, value: CGFloat, range: ClosedRange<CGFloat>, step: CGFloat, tip: String, onChange: @escaping (CGFloat) -> Void) -> some View {
+    func settingRow(_ label: String, icon: String, value: Binding<CGFloat>, range: ClosedRange<CGFloat>, step: CGFloat, tip: String) -> some View {
         HStack {
             Label(label, systemImage: icon)
             Spacer()
-            Slider(value: Binding(
-                get: { value },
-                set: { onChange($0) }
-            ), in: range, step: step)
+            Slider(value: value, in: range, step: step)
                 .frame(width: 150)
                 .help(tip)
-            Text("\(Int(value))pt")
+            Text("\(Int(value.wrappedValue))pt")
                 .monospacedDigit()
                 .frame(width: 40)
         }

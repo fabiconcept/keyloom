@@ -221,6 +221,8 @@ class KeyboardSettings: ObservableObject {
         panelBorderWidth = 1
         panelBorderColor = "white"
         panelBorderOpacity = 1.0
+        keyboardPaddingHorizontal = 16
+        keyboardPaddingVertical = 16
     }
 
     var resolvedBorderColor: Color {
